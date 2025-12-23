@@ -31,7 +31,8 @@ class Invoice extends Model
         'tenantId',
         'status',
         'createdBy',
-        'customerId'
+        'customerId',
+        'receiptId'
 
     ];
 

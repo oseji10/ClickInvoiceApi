@@ -27,6 +27,17 @@ class InvoicePdfController extends Controller
         return $this->pdfService->downloadInvoicePdf($invoice);
     }
 
+
+    public function downloadReceipt(Request $request, $id)
+    {
+        // return $id;
+        $receipt = Invoice::with(['items', 'currencyDetail', 'tenant', 'customer'])
+            ->where('receiptId', $id)
+            ->first();
+
+        return $this->pdfService->downloadReceiptPdf($receipt);
+    }
+
     public function stream($id)
     {
         $invoice = Invoice::with(['items', 'currencyDetail', 'tenant', 'customer'])
@@ -93,6 +104,69 @@ class InvoicePdfController extends Controller
 
             // Update invoice status if needed
             $invoice->update([
+                'sent_at' => now(),
+                'sent_to' => $customerEmail
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Invoice sent successfully to ' . $customerEmail
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to send invoice email: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to send email: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+
+
+
+    public function sendReceiptEmail(Request $request, $id)
+    {
+        $receipt = Invoice::with(['items', 'currencyDetail', 'tenant', 'customer'])
+        // ->findOrFail($id);
+        ->where('receiptId', $id)
+        ->first();
+
+        $customer = Customer::where('customerId', $receipt->customerId)->first();
+        $customerEmail = $customer->customerEmail;
+        // $request->validate([
+        //     'customer_email' => 'required|email'
+        // ]);
+
+        // Generate PDF
+        $result = $this->pdfService->generateReceiptPdf($receipt);
+
+        // Send email with PDF attachment
+        // $customerEmail = $request->customer_email ?? $invoice->customer->customerEmail;
+
+        if (!$customerEmail) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Customer email not found'
+            ], 400);
+        }
+
+        try {
+            \Mail::send('emails.receipt', [
+                'receipt' => $receipt,
+                'customerName' => $receipt->customer->customerName ?? $receipt->accountName
+            ], function ($message) use ($receipt, $customerEmail, $result) {
+                $message->to($customerEmail)
+                    ->subject('Receipt: ' . ($receipt->receiptId))
+                    ->attachData($result['pdf_content'], $result['filename'], [
+                        'mime' => 'application/pdf',
+                    ]);
+            });
+
+            // Update invoice status if needed
+            $receipt->update([
                 'sent_at' => now(),
                 'sent_to' => $customerEmail
             ]);

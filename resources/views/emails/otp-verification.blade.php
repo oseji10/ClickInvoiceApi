@@ -20,7 +20,7 @@
 </head>
 <body>
     <div class="container">
-        <img src="{{ asset('images/logo.svg') }}" alt="Click Invoice Logo" style="max-width: 150px; display: block; margin: 0 auto 10px;">
+        <img src="{{ asset('images/logo.svg') }}" alt="ClickInvoice Logo" style="max-width: 150px; display: block; margin: 0 auto 10px;">
         <!-- <div class="header">
             <h1>iDriva</h1>
             <p>Professional Driver Network</p>

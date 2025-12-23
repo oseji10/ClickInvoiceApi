@@ -37,6 +37,35 @@ class InvoicePdfService
         ];
     }
 
+
+    public function generateReceiptPdf(Invoice $invoice)
+    {
+        $invoice->load([
+            'items',
+            'currencyDetail',
+            'tenant',
+            'customer'
+        ]);
+
+        $data = $this->prepareReceiptData($invoice);
+
+        $pdf = Pdf::loadView('pdf.receipt', $data);
+
+        // Generate filename
+        $filename = 'receipt_' . ($invoice->receiptId ?? $invoice->invoiceId) . '_' . time() . '.pdf';
+
+        // Save to storage
+        $path = 'receipts/' . $filename;
+        Storage::disk('public')->put($path, $pdf->output());
+
+        return [
+            'path' => $path,
+            'filename' => $filename,
+            'full_path' => Storage::disk('public')->url($path),
+            'pdf_content' => $pdf->output()
+        ];
+    }
+
     protected function prepareInvoiceData(Invoice $invoice)
     {
         // Calculate totals
@@ -52,11 +81,21 @@ class InvoicePdfService
         // $logoUrl = $invoice->tenant->tenantLogo
         //     ? $this->getImageUrl($invoice->tenant->tenantLogo)
         //     : null;
-        $logoUrl = "/tenant-logos/bKgsDCxCeRQeO7YfzYZjuozyoFqfMWPo82zGaqJA.png";
 
-        $signatureUrl = $invoice->tenant->authorizedSignature
-            ? $this->getImageUrl($invoice->tenant->authorizedSignature)
-            : null;
+        // $imagePath = storage_path('app/public/tenant-logos/cons_logo.png');
+$imagePath = storage_path('app/public/' . ltrim($invoice->tenant->tenantLogo, '/'));
+$imageData = base64_encode(file_get_contents($imagePath));
+$imageType = pathinfo($imagePath, PATHINFO_EXTENSION);
+$logoUrl = 'data:image/' . $imageType . ';base64,' . $imageData;
+
+$imagePath = storage_path('app/public/' . ltrim($invoice->tenant->authorizedSignature, '/'));
+$imageData = base64_encode(file_get_contents($imagePath));
+$imageType = pathinfo($imagePath, PATHINFO_EXTENSION);
+$signatureUrl = 'data:image/' . $imageType . ';base64,' . $imageData;
+
+        // $signatureUrl = $invoice->tenant->authorizedSignature
+        //     ? $this->getImageUrl($invoice->tenant->authorizedSignature)
+        //     : null;
 
         return [
             'invoice' => $invoice,
@@ -96,6 +135,79 @@ class InvoicePdfService
         ];
     }
 
+
+
+    protected function prepareReceiptData(Invoice $receipt)
+    {
+        // Calculate totals
+        $subtotal = $receipt->items->sum('amount');
+        $taxPercentage = (float) $receipt->taxPercentage;
+        $taxAmount = $subtotal * ($taxPercentage / 100);
+        $totalAmount = $subtotal + $taxAmount;
+        $amountPaid = (float) $receipt->amountPaid;
+        $balanceDue = $totalAmount - $amountPaid;
+
+        // Build image URLs
+        $baseUrl = config('app.url');
+        // $logoUrl = $invoice->tenant->tenantLogo
+        //     ? $this->getImageUrl($invoice->tenant->tenantLogo)
+        //     : null;
+
+        // $imagePath = storage_path('app/public/tenant-logos/cons_logo.png');
+$imagePath = storage_path('app/public/' . ltrim($receipt->tenant->tenantLogo, '/'));
+$imageData = base64_encode(file_get_contents($imagePath));
+$imageType = pathinfo($imagePath, PATHINFO_EXTENSION);
+$logoUrl = 'data:image/' . $imageType . ';base64,' . $imageData;
+
+$imagePath = storage_path('app/public/' . ltrim($receipt->tenant->authorizedSignature, '/'));
+$imageData = base64_encode(file_get_contents($imagePath));
+$imageType = pathinfo($imagePath, PATHINFO_EXTENSION);
+$signatureUrl = 'data:image/' . $imageType . ';base64,' . $imageData;
+
+        // $signatureUrl = $invoice->tenant->authorizedSignature
+        //     ? $this->getImageUrl($invoice->tenant->authorizedSignature)
+        //     : null;
+
+        return [
+            'invoice' => $receipt,
+            'subtotal' => $subtotal,
+            'taxAmount' => $taxAmount,
+            'totalAmount' => $totalAmount,
+            'balanceDue' => $balanceDue,
+            'amountPaid' => $amountPaid,
+            'currencySymbol' => $invoice->currencyDetail->currencySymbol ?? '₦',
+            'currencyCode' => $invoice->currencyDetail->currencyCode ?? 'NGN',
+            'logoUrl' => $logoUrl,
+            'signatureUrl' => $signatureUrl,
+            'companyName' => $receipt->tenant->tenantName,
+            'companyEmail' => $receipt->tenant->tenantEmail,
+            'companyPhone' => $receipt->tenant->tenantPhone,
+            'customerName' => $receipt->customer->customerName ?? $receipt->accountName,
+            'customerEmail' => $receipt->customer->customerEmail ?? null,
+            'customerPhone' => $receipt->customer->customerPhone ?? null,
+            'customerAddress' => $receipt->customer->customerAddress ?? null,
+            'projectName' => $receipt->projectName,
+            'receiptDate' => $receipt->updated_at,
+            'dueDate' => $receipt->dueDate,
+            'status' => $receipt->status,
+            'receiptId' => $receipt->receiptId,
+            'userGeneratedInvoiceId' => $receipt->userGeneratedInvoiceId,
+            'notes' => $receipt->notes,
+            'accountName' => $receipt->accountName,
+            'accountNumber' => $receipt->accountNumber,
+            'bank' => $receipt->bank,
+            'taxPercentage' => $taxPercentage,
+            'items' => $receipt->items->map(function ($item) {
+                return [
+                    'description' => $item->itemDescription,
+                    'amount' => (float) $item->amount
+                ];
+            })
+        ];
+    }
+
+
+
     protected function getImageUrl($path)
     {
         if (!$path) {
@@ -124,6 +236,17 @@ class InvoicePdfService
 
         return $pdf->download($filename);
     }
+
+    public function downloadReceiptPdf(Invoice $receipt)
+    {
+        $data = $this->prepareReceiptData($receipt);
+        $filename = 'Receipt_' . ($receipt->receiptId ?? $receipt->invoiceId) . '.pdf';
+
+        $pdf = Pdf::loadView('pdf.receipt', $data);
+
+        return $pdf->download($filename);
+    }
+
 
     public function streamInvoicePdf(Invoice $invoice)
     {

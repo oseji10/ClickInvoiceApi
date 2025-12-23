@@ -27,6 +27,7 @@ return new class extends Migration
             $table->string('accountNumber')->nullable();
             $table->string('bank')->nullable();
             $table->string('taxPercentage')->nullable();
+            $table->string('receiptId')->nullable();
             $table->unsignedBigInteger('tenantId')->nullable();
             $table->unsignedBigInteger('createdBy')->nullable();
             $table->timestamps();

@@ -7,6 +7,7 @@ use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\Tenant;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class InvoiceController extends Controller
 {
@@ -100,6 +101,21 @@ class InvoiceController extends Controller
     }
 
 
+    public function getUserReceipts(Request $request)
+    {
+        $tenantId = $request->header('X-Tenant-ID');
+        $userId = Auth::id();
+
+        $invoices = Invoice::with('items', 'currencyDetail', 'customer')
+            ->where('createdBy', $userId)
+            ->where('tenantId', $tenantId)
+            ->where('status', 'PAID')
+            ->orWhere('status', 'PARTIAL_PAYMENT')
+            ->get();
+
+        return response()->json($invoices);
+    }
+
      public function getLast5UserInvoices(Request $request)
 {
     $tenantId = $request->header('X-Tenant-ID');
@@ -184,7 +200,99 @@ public function getInvoiceByInvoiceId(Request $request, $invoiceId)
     }
 
 
-    public function updateInvoiceStatus(Request $request, $invoiceId)
+    public function getReceiptByReceiptId(Request $request, $receiptId)
+    {
+        $tenantId = $request->header('X-Tenant-ID');
+        $userId = Auth::id();
+
+        $invoice = Invoice::with('items', 'currencyDetail', 'tenant', 'customer')
+            ->where('createdBy', $userId)
+            ->where('receiptId', $receiptId)
+            ->where('tenantId', $tenantId)
+            ->get();
+
+        return response()->json($invoice);
+    }
+
+public function getInvoiceAndReceiptsByCustomerId(Request $request, $customerId)
+    {
+        $tenantId = $request->header('X-Tenant-ID');
+        $userId = Auth::id();
+
+        $invoice = Invoice::with('items', 'currencyDetail', 'tenant', 'customer')
+            ->where('createdBy', $userId)
+            ->where('customerId', $customerId)
+            ->where('tenantId', $tenantId)
+            ->get();
+
+        return response()->json($invoice);
+    }
+
+
+
+
+
+
+
+//     public function updateInvoiceStatus(Request $request, $invoiceId)
+// {
+//     $invoice = Invoice::where('invoiceId', $invoiceId)->first();
+
+//     if (!$invoice) {
+//         return response()->json([
+//             'message' => 'Invoice not found'
+//         ], 404);
+//     }
+
+//     $validated = $request->validate([
+//         'status' => 'required|string',
+//         'amountPaid' => 'nullable|numeric|min:0'
+//     ]);
+
+//     $status = strtoupper($validated['status']);
+
+//     // 🔹 PAID: clear balance, move everything to amountPaid
+//     if ($status === 'PAID') {
+//         $invoice->amountPaid = $invoice->amountPaid + $invoice->balanceDue;
+//         $invoice->balanceDue = 0;
+//         $invoice->status = 'PAID';
+//     }
+
+//     // 🔹 PARTIAL PAYMENT: use amount sent from frontend
+//     elseif ($status === 'PARTIAL_PAYMENT') {
+//         if (!isset($validated['amountPaid'])) {
+//             return response()->json([
+//                 'message' => 'amountPaid is required for partial payment'
+//             ], 422);
+//         }
+
+//         $partialAmount = (float) $validated['amountPaid'];
+
+//         if ($partialAmount > $invoice->balanceDue) {
+//             return response()->json([
+//                 'message' => 'Amount paid cannot exceed balance due'
+//             ], 422);
+//         }
+
+//         $invoice->amountPaid += $partialAmount;
+//         $invoice->balanceDue -= $partialAmount;
+//         $invoice->status = 'PARTIAL_PAYMENT';
+//     }
+
+//     // 🔹 Other statuses (optional handling)
+//     else {
+//         $invoice->status = $status;
+//     }
+
+//     $invoice->save();
+
+//     return response()->json([
+//         'message' => 'Invoice updated successfully',
+//         'invoice' => $invoice
+//     ]);
+// }
+
+public function updateInvoiceStatus(Request $request, $invoiceId)
 {
     $invoice = Invoice::where('invoiceId', $invoiceId)->first();
 
@@ -201,14 +309,28 @@ public function getInvoiceByInvoiceId(Request $request, $invoiceId)
 
     $status = strtoupper($validated['status']);
 
+    /**
+     * Generate receipt ID ONLY if:
+     * - Status is PAID or PARTIAL_PAYMENT
+     * - AND receiptId does not already exist
+     */
+    $receiptId = strtoupper(Str::random(2)) . mt_rand(1000000000, 9999999999);
+    $shouldGenerateReceipt =
+        in_array($status, ['PAID', 'PARTIAL_PAYMENT']) &&
+        empty($invoice->receiptId);
+
+    if ($shouldGenerateReceipt) {
+        $invoice->receiptId = 'RCPT-' . $receiptId;
+    }
+
     // 🔹 PAID: clear balance, move everything to amountPaid
     if ($status === 'PAID') {
-        $invoice->amountPaid = $invoice->amountPaid + $invoice->balanceDue;
+        $invoice->amountPaid += $invoice->balanceDue;
         $invoice->balanceDue = 0;
         $invoice->status = 'PAID';
     }
 
-    // 🔹 PARTIAL PAYMENT: use amount sent from frontend
+    // 🔹 PARTIAL PAYMENT
     elseif ($status === 'PARTIAL_PAYMENT') {
         if (!isset($validated['amountPaid'])) {
             return response()->json([
@@ -229,7 +351,7 @@ public function getInvoiceByInvoiceId(Request $request, $invoiceId)
         $invoice->status = 'PARTIAL_PAYMENT';
     }
 
-    // 🔹 Other statuses (optional handling)
+    // 🔹 Other statuses
     else {
         $invoice->status = $status;
     }

@@ -29,6 +29,7 @@ use App\Http\Controllers\ServicesController;
 use App\Http\Controllers\CommodityController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\CustomerController as ControllersCustomerController;
 use App\Http\Controllers\FollowController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\OtpController;
@@ -143,15 +144,22 @@ Route::middleware(['auth.jwt', 'tenant'])->group(function () {
 
     // Get all invoices for logged-in user
     Route::get('/invoices', [InvoiceController::class, 'getUserInvoices']);
+    Route::get('/receipts', [InvoiceController::class, 'getUserReceipts']);
+
+
 
     // Get a single invoice by tenant ID
     Route::get('/invoices/tenant/{tenantId}', [InvoiceController::class, 'getInvoiceByTenant']);
 
     // Get a single invoice by Invoice ID
     Route::get('/invoices/{invoiceId}', [InvoiceController::class, 'getInvoiceByInvoiceId']);
+    Route::get('/receipts/{receiptId}', [InvoiceController::class, 'getReceiptByReceiptId']);
     Route::patch('/invoices/{invoiceId}/status', [InvoiceController::class, 'updateInvoiceStatus']);
 
-
+    Route::get('/customers', [CustomerController::class, 'getTenantCustomers']);
+    Route::get('/customers/{customerId}/invoices-and-receipt', [InvoiceController::class, 'getInvoiceAndReceiptsByCustomerId']);
+   Route::post('/customers/{customerId}/send-email', [CustomerController::class, 'sendSingleEmail']);
+    Route::post('/customers/broadcast-email', [CustomerController::class, 'broadcastEmail']);
     // Route::get('/invoices/{invoiceId}', [InvoiceController::class, 'show'])
     // ->where('invoiceId', '[A-Za-z0-9\-]+');
 
@@ -252,3 +260,11 @@ Route::prefix('invoices')->group(function () {
     Route::get('/{id}/generate-pdf', [InvoicePdfController::class, 'generate']);
     Route::post('/{id}/send-email', [InvoicePdfController::class, 'sendEmail']);
 });
+
+Route::prefix('receipts')->group(function () {
+    Route::get('/{id}/pdf', [InvoicePdfController::class, 'downloadReceipt']);
+    Route::get('/{id}/stream-pdf', [InvoicePdfController::class, 'stream']);
+    Route::get('/{id}/generate-pdf', [InvoicePdfController::class, 'generate']);
+    Route::post('/{id}/send-email', [InvoicePdfController::class, 'sendReceiptEmail']);
+});
+
