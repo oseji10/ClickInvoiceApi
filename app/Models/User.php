@@ -106,6 +106,26 @@ class User extends Authenticatable implements JWTSubject
                 ->where('isDefault', 1);
 }
 
+public function invoices()
+    {
+        return $this->hasMany(Invoice::class, 'createdBy', 'id'); // Or direct if invoices belong to users
+    }
+
+public function canCreateTenant(): bool
+    {
+        if ($this->currentPlan === "2") {
+            return true;
+        }
+        return $this->default_tenant()->count() < 1;
+    }
+
+    public function canCreateInvoice(): bool
+    {
+        if ($this->currentPlan === "2") {
+            return true;
+        }
+        return $this->invoices()->count() < 3;
+    }
 
 
 }

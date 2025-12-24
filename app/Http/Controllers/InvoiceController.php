@@ -16,6 +16,14 @@ class InvoiceController extends Controller
      */
     public function store(Request $request)
     {
+        $user = Auth::user();
+
+        if (!$user->canCreateInvoice()) {
+            return response()->json([
+                'message' => 'Sorry you can\'t add any more invoices. Upgrade to premium to generate more invoices.'
+            ], 403);
+        }
+
         $tenantId = $request->header('X-Tenant-ID');
         $request->validate([
             'invoiceId' => 'required|unique:invoices,invoiceId',

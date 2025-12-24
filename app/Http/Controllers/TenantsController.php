@@ -32,6 +32,13 @@ public function myTenants(Request $request)
 
     public function store(Request $request)
     {
+
+        $user = Auth::user();
+        if (!$user->canCreateTenant()) {
+            return response()->json([
+                'message' => 'Sorry you can\'t add any more tenants. Upgrade to premium to add more tenants.'
+            ], 403);
+        }
         // Validate the request data
         $validated = $request->validate([
             'tenantName' => 'required|string|max:255',

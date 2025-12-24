@@ -46,6 +46,7 @@ use App\Http\Controllers\InvoicePdfController;
 use App\Http\Controllers\TenantsController;
 use App\Models\Currency;
 use App\Models\PaymentGateway;
+use App\Models\Plans;
 use Tymon\JWTAuth\Claims\Custom;
 
 /*
@@ -102,6 +103,15 @@ Route::middleware(['auth.jwt', 'tenant'])->group(function () {
             ]
         ]);
     });
+
+Route::get('/plans', function(){
+    $plans = Plans::orderBy('planId')->get();
+    return response()->json($plans);
+});
+
+    Route::get('profile', [UsersController::class, 'userProfile']);
+    Route::patch('/profile', [UsersController::class, 'updateUser']);
+    Route::patch('/profile/password', [UsersController::class, 'updatePassword']);
 
     Route::patch('/tenants/{tenantId}/set-default', [TenantsController::class, 'setDefaultTenant']);
 

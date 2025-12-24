@@ -25,6 +25,7 @@ class IdentifyTenant
             'roles',
             'stripe/webhook',
             'learning',
+
         ];
 
         $tenantOptionalRoutes = [

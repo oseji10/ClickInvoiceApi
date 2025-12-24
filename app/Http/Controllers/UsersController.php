@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
-use App\Models\Staff; 
+use App\Models\Staff;
 use App\Models\StaffType;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
@@ -22,6 +22,7 @@ use App\Models\Skills;
 use App\Models\WorkExperience;
 use Illuminate\Queue\Worker;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rules\Password;
 
 class UsersController extends Controller
 {
@@ -29,7 +30,7 @@ class UsersController extends Controller
     // {
     //     $users = User::with('staff.staff_type')->get();
     //     return response()->json($users);
-       
+
     // }
 
 
@@ -37,12 +38,11 @@ class UsersController extends Controller
 
 
 
- 
 
 
 
-    
-        public function update(Request $request, $id)  
+
+        public function update(Request $request, $id)
 {
         $user = User::find($id);
         if (!$user) {
@@ -96,7 +96,7 @@ class UsersController extends Controller
             'location' => $user->location,
             'bio' => $user->bio,
             'created_at' => $user->created_at,
-       
+
         ]);
     }
 
@@ -142,7 +142,7 @@ class UsersController extends Controller
 
     $workExperience = WorkExperience::where('userId', $user->id)->get();
 
-    
+
 
     // If found, return the actual fields
     return response()->json([
@@ -164,7 +164,7 @@ class UsersController extends Controller
 
     $skills = Skills::where('userId', $user->id)->get();
 
-   
+
 
      return response()->json([
         'skills' => $skills
@@ -184,7 +184,7 @@ public function userDriversLicenseProfile(Request $request)
 
     $driversLicense = DriversLicense::where('userId', $user->id)->first();
 
-   
+
 
      return response()->json([
         'driversLicense' => $driversLicense
@@ -335,7 +335,7 @@ public function storeUserSkills(Request $request)
       $validated['userId'] = $user->id;
       $skills = Skills::create($validated);
 
-  
+
 
     return response()->json([
         'message' => 'Skills saved successfully',
@@ -504,7 +504,7 @@ public function deleteUserDriversLicense(Request $request, $id)
 }
 
 
-public function profile($id, Request $request)
+public function userProfile(Request $request)
 {
     $authUser = Auth::user(); // logged-in user
     $user = User::with('user_role')->find($authUser->id); // Eager load role
@@ -515,25 +515,70 @@ public function profile($id, Request $request)
         ], 404);
     }
 
-    // Check if authenticated user is following this profile
-    $isFollowing = false;
-    if ($authUser && $authUser->id !== $user->id) {
-        $isFollowing = $authUser->followings()->where('followedId', $user->id)->exists();
-    }
-
     return response()->json([
         'id' => $user->id,
         'firstName' => $user->firstName,
         'lastName' => $user->lastName,
-        'bio' => $user->bio,
-        'profileImage' => $user->profileImage,
-        'coverImage' => $user->coverImage,
+        'email' => $user->email,
+        'phoneNumber' => $user->phoneNumber,
         'role' => $user->user_role->roleName ?? 'Member', // Get role name with fallback
-        // 'roleId' => $user->role_id, // Also include roleId if needed
-        'followersCount' => $user->followers()->count(),
-        'followingCount' => $user->followings()->count(),
-        'isFollowing' => $isFollowing,
+
     ]);
 }
+
+
+
+public function updateUser(Request $request)
+    {
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'firstName'   => 'required|string|max:255',
+            'lastName'    => 'required|string|max:255',
+            'phoneNumber' => 'nullable|string|max:20',
+        ]);
+
+        $user->update([
+            'firstName' => $validated['firstName'],
+            'lastName'  => $validated['lastName'],
+            'phoneNumber'      => $validated['phoneNumber'] ?? null,
+        ]);
+
+        return response()->json([
+            'message' => 'Profile updated successfully',
+            'user'    => [
+                'firstName'   => $user->fresh()->firstName,
+                'lastName'    => $user->fresh()->lastName,
+                'email'       => $user->email,
+                'phoneNumber' => $user->phoneNumber,
+            ]
+        ]);
+    }
+
+    /**
+     * PATCH /api/profile/password
+     * Change user's password
+     */
+    public function updatePassword(Request $request)
+    {
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'currentPassword' => ['required', function ($attribute, $value, $fail) use ($user) {
+                if (!Hash::check($value, $user->password)) {
+                    $fail('The current password is incorrect.');
+                }
+            }],
+            'newPassword' => ['required', 'confirmed', Password::min(8)->letters()->numbers()],
+        ]);
+
+        $user->update([
+            'password' => Hash::make($validated['newPassword']),
+        ]);
+
+        return response()->json([
+            'message' => 'Password changed successfully'
+        ]);
+    }
 
 }

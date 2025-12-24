@@ -14,9 +14,14 @@ return new class extends Migration
         Schema::create('plans', function (Blueprint $table) {
             $table->id('planId');
             $table->string('planName')->nullable();
-            $table->text('perks')->nullable();
+            $table->decimal('price', 10, 2)->nullable();
+            $table->unsignedBigInteger('currency')->nullable();
+            $table->text('features')->nullable();
+            $table->boolean('isPopular')->default(true);
             $table->timestamps();
             $table->softDeletes();
+
+            $table->foreign('currency')->references('currencyId')->on('currencies')->onDelete('cascade');
 
         });
     }
