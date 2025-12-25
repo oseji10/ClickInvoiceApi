@@ -78,24 +78,44 @@ class InvoicePdfService
 
         // Build image URLs
         $baseUrl = config('app.url');
-        // $logoUrl = $invoice->tenant->tenantLogo
-        //     ? $this->getImageUrl($invoice->tenant->tenantLogo)
-        //     : null;
+
 
         // $imagePath = storage_path('app/public/tenant-logos/cons_logo.png');
-$imagePath = storage_path('app/public/' . ltrim($invoice->tenant->tenantLogo, '/'));
-$imageData = base64_encode(file_get_contents($imagePath));
-$imageType = pathinfo($imagePath, PATHINFO_EXTENSION);
-$logoUrl = 'data:image/' . $imageType . ';base64,' . $imageData;
+// $imagePath = storage_path('app/public/' . ltrim($invoice->tenant->tenantLogo, '/'));
+// $imageData = base64_encode(file_get_contents($imagePath));
+// $imageType = pathinfo($imagePath, PATHINFO_EXTENSION);
+// $logoUrl = 'data:image/' . $imageType . ';base64,' . $imageData;
 
-$imagePath = storage_path('app/public/' . ltrim($invoice->tenant->authorizedSignature, '/'));
-$imageData = base64_encode(file_get_contents($imagePath));
-$imageType = pathinfo($imagePath, PATHINFO_EXTENSION);
-$signatureUrl = 'data:image/' . $imageType . ';base64,' . $imageData;
+// $imagePath = storage_path('app/public/' . ltrim($invoice->tenant->authorizedSignature, '/'));
+// $imageData = base64_encode(file_get_contents($imagePath));
+// $imageType = pathinfo($imagePath, PATHINFO_EXTENSION);
+// $signatureUrl = 'data:image/' . $imageType . ';base64,' . $imageData;
 
-        // $signatureUrl = $invoice->tenant->authorizedSignature
-        //     ? $this->getImageUrl($invoice->tenant->authorizedSignature)
-        //     : null;
+       $logoUrl = null;
+$signatureUrl = null;
+
+/* ---------- LOGO ---------- */
+if (!empty($invoice->tenant->tenantLogo)) {
+    $logoPath = storage_path('app/public/' . ltrim($invoice->tenant->tenantLogo, '/'));
+
+    if (file_exists($logoPath) && is_file($logoPath)) {
+        $logoData = base64_encode(file_get_contents($logoPath));
+        $logoType = pathinfo($logoPath, PATHINFO_EXTENSION);
+        $logoUrl = 'data:image/' . $logoType . ';base64,' . $logoData;
+    }
+}
+
+/* ---------- SIGNATURE ---------- */
+if (!empty($invoice->tenant->authorizedSignature)) {
+    $signaturePath = storage_path('app/public/' . ltrim($invoice->tenant->authorizedSignature, '/'));
+
+    if (file_exists($signaturePath) && is_file($signaturePath)) {
+        $signatureData = base64_encode(file_get_contents($signaturePath));
+        $signatureType = pathinfo($signaturePath, PATHINFO_EXTENSION);
+        $signatureUrl = 'data:image/' . $signatureType . ';base64,' . $signatureData;
+    }
+}
+
 
         return [
             'invoice' => $invoice,
