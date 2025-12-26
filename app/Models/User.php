@@ -116,7 +116,7 @@ public function canCreateTenant(): bool
         if ($this->currentPlan === "2") {
             return true;
         }
-        return $this->default_tenant()->count() < 1;
+        return $this->default_tenant()->count() < 4;
     }
 
     public function canCreateInvoice(): bool

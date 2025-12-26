@@ -45,8 +45,8 @@ public function myTenants(Request $request)
 
             'tenantEmail' => 'required|email',
             'tenantPhone' => 'nullable|string',
-            'tenantLogo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'authorizedSignature' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'tenantLogo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'authorizedSignature' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             // 'countryCode' => 'required|string',
             'timezone' => 'required|string',
             'gatewayPreference' => 'nullable|integer|exists:payment_gateways,gatewayId',
