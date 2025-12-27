@@ -133,5 +133,9 @@ public function canCreateTenant(): bool
         return $this->invoices()->count() < 3;
     }
 
+public function subscription()
+{
+    return $this->hasOne(Subscription::class, 'userId', 'id');
+}
 
 }

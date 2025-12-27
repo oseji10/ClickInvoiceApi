@@ -48,26 +48,6 @@ Route::get('/cover-images/{filename}', function ($filename) {
     }
     return response()->file($path);
 });
-/*
-|--------------------------------------------------------------------------
-| Learning Routes
-|--------------------------------------------------------------------------
-|
-| Handles course listing, course details, checkout, enrollment, and
-| payment verification.
-|
-*/
-Route::prefix('learning')->group(function () {
-    Route::get('/', [LearningController::class, 'index']);                   // List courses
-    Route::get('/{id}', [LearningController::class, 'show']);                // Course details
-    Route::post('/{id}/checkout', [LearningController::class, 'createCheckoutSession']); // Start payment
-    Route::post('/{id}/enroll', [LearningController::class, 'enroll']);      // Free enrollment
 
 
-    // User-facing success page (Blade view)
-    Route::get('/{id}/payment-verify', [LearningController::class, 'verifyPaymentPage']);
-
-
-    // API endpoint for frontend fetch (JSON)
-    Route::get('/api/{id}/payment-verify', [LearningController::class, 'verifyPaymentApi']);
-});
+Route::post('/flutterwave/webhook', [WebhookController::class, 'handle'])->withoutMiddleware('csrf');

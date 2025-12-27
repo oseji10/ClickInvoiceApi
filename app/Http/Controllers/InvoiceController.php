@@ -198,7 +198,7 @@ public function getInvoiceByInvoiceId(Request $request, $invoiceId)
         $tenantId = $request->header('X-Tenant-ID');
         $userId = Auth::id();
 
-        $invoice = Invoice::with('items', 'currencyDetail', 'tenant', 'customer')
+        $invoice = Invoice::with('items', 'currencyDetail', 'tenant', 'customer', 'creator')
             ->where('createdBy', $userId)
             ->where('invoiceId', $invoiceId)
             ->where('tenantId', $tenantId)
@@ -213,7 +213,7 @@ public function getInvoiceByInvoiceId(Request $request, $invoiceId)
         $tenantId = $request->header('X-Tenant-ID');
         $userId = Auth::id();
 
-        $invoice = Invoice::with('items', 'currencyDetail', 'tenant', 'customer')
+        $invoice = Invoice::with('items', 'currencyDetail', 'tenant', 'customer', 'creator')
             ->where('createdBy', $userId)
             ->where('receiptId', $receiptId)
             ->where('tenantId', $tenantId)

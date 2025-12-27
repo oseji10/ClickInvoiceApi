@@ -48,6 +48,8 @@ use App\Models\Currency;
 use App\Models\PaymentGateway;
 use App\Models\Plans;
 use Tymon\JWTAuth\Claims\Custom;
+use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\WebhookController;
 
 /*
 |--------------------------------------------------------------------------
@@ -184,9 +186,9 @@ Route::get('/plans', function(){
 
 
 
+Route::post('/subscribe/{planId}', [SubscriptionController::class, 'create']); // Add auth
 
-
-    Route::get('/users/{id}/profile', [UsersController::class, 'profile']);
+Route::get('/users/{id}/profile', [UsersController::class, 'profile']);
 });
 
 Route::prefix('invoices')->group(function () {
@@ -203,3 +205,5 @@ Route::prefix('receipts')->group(function () {
     Route::post('/{id}/send-email', [InvoicePdfController::class, 'sendReceiptEmail']);
 });
 
+
+Route::post('/flutterwave/webhook', [WebhookController::class, 'handle']);
