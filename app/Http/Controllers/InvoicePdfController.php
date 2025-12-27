@@ -20,7 +20,8 @@ class InvoicePdfController extends Controller
     public function download(Request $request, $id)
     {
         // return $id;
-        $invoice = Invoice::with(['items', 'currencyDetail', 'tenant', 'customer'])
+        // return $invoice = Invoice::with(['creator'])
+         $invoice = Invoice::with(['items', 'currencyDetail', 'tenant', 'customer', 'creator'])
             ->where('invoiceId', $id)
             ->first();
 

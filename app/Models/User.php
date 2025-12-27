@@ -92,6 +92,12 @@ class User extends Authenticatable implements JWTSubject
     }
 
 
+     public function user_plan()
+    {
+        return $this->belongsTo(Plans::class, 'planId', 'currentPlan');
+    }
+
+
     // Profile relationship
  public function default_tenant()
 {
@@ -116,7 +122,7 @@ public function canCreateTenant(): bool
         if ($this->currentPlan === "2") {
             return true;
         }
-        return $this->default_tenant()->count() < 4;
+        return $this->default_tenant()->count() < 2;
     }
 
     public function canCreateInvoice(): bool

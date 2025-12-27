@@ -12,20 +12,44 @@
             color: #333;
             margin: 0;
             padding: 0;
+            position: relative; /* For watermark positioning */
         }
 
         .container {
             padding: 50px;
         }
 
-        .header {
-    display: flex;
-    align-items: flex-start;
-    margin-bottom: 40px;
-    border-bottom: 2px solid #e0e0e0;
-    padding-bottom: 20px;
-}
+        /* Watermark Logo */
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            opacity: 0.15;
+            pointer-events: none;
+            z-index: 10;
+            text-align: center;
+        }
 
+        .watermark img {
+            width: 400px;
+            height: auto;
+        }
+
+        .watermark-note {
+            margin-top: 15px;
+            font-size: 18px;
+            color: #666;
+            font-weight: bold;
+        }
+
+        .header {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 20px;
+        }
 
         .logo-container {
             width: 150px;
@@ -37,20 +61,19 @@
         }
 
         .company-info {
-    flex: 1;
-    text-align: right;
-    padding-left: 20px;
-}
+            flex: 1;
+            text-align: right;
+            padding-left: 20px;
+        }
 
-.company-name {
-    font-size: 22px;
-    font-weight: bold;
-    margin-bottom: 8px;
-    color: #1e40af;
-    white-space: normal;
-    word-wrap: break-word;
-}
-
+        .company-name {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #1e40af;
+            white-space: normal;
+            word-wrap: break-word;
+        }
 
         .title {
             font-size: 30px;
@@ -195,9 +218,33 @@
         .amount {
             font-family: 'DejaVu Sans', monospace;
         }
+
+        /* Footer note */
+        .footer-note {
+            margin-top: 60px;
+            text-align: center;
+            font-size: 10px;
+            color: #666;
+            padding: 15px;
+            background-color: #f9fafb;
+            border-top: 1px solid #e5e7eb;
+        }
     </style>
 </head>
 <body>
+    <!-- Watermark Logo -->
+    <!-- <div class="watermark">
+        <img src="https://clickinvoice.app/logo.png" alt="ClickInvoice Logo">
+        <div class="watermark-note">Remove this logo for just $2</div>
+    </div> -->
+
+            @if((int) $current_plan === 1)
+    <div class="watermark">
+         <img src="https://app.clickinvoice.clickbase.tech/images/logo/logo.svg" alt="ClickInvoice Logo">
+        <div class="watermark-note">Remove this logo for just $2</div>
+    </div>
+@endif
+
     <div class="container">
         <!-- Company Header -->
         <div class="header">
@@ -329,6 +376,20 @@
                 <div class="signature-label">Authorized Signature</div>
             </div>
         </div>
+
+        <!-- Footer Note -->
+         @if((int) $current_plan === 1)
+    <div class="footer-note">
+        This invoice was generated at
+        <strong>
+            <a href="https://clickinvoice.app" target="_blank">
+                clickinvoice.app
+            </a>
+        </strong>.
+        Visit ClickInvoice to begin generating yours.
+    </div>
+@endif
+
     </div>
 </body>
 </html>

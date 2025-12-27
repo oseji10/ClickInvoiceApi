@@ -79,19 +79,7 @@ class InvoicePdfService
         // Build image URLs
         $baseUrl = config('app.url');
 
-
-        // $imagePath = storage_path('app/public/tenant-logos/cons_logo.png');
-// $imagePath = storage_path('app/public/' . ltrim($invoice->tenant->tenantLogo, '/'));
-// $imageData = base64_encode(file_get_contents($imagePath));
-// $imageType = pathinfo($imagePath, PATHINFO_EXTENSION);
-// $logoUrl = 'data:image/' . $imageType . ';base64,' . $imageData;
-
-// $imagePath = storage_path('app/public/' . ltrim($invoice->tenant->authorizedSignature, '/'));
-// $imageData = base64_encode(file_get_contents($imagePath));
-// $imageType = pathinfo($imagePath, PATHINFO_EXTENSION);
-// $signatureUrl = 'data:image/' . $imageType . ';base64,' . $imageData;
-
-       $logoUrl = null;
+        $logoUrl = null;
 $signatureUrl = null;
 
 /* ---------- LOGO ---------- */
@@ -119,6 +107,7 @@ if (!empty($invoice->tenant->authorizedSignature)) {
 
         return [
             'invoice' => $invoice,
+            'current_plan' => $invoice->creator->currentPlan,
             'subtotal' => $subtotal,
             'taxAmount' => $taxAmount,
             'totalAmount' => $totalAmount,
