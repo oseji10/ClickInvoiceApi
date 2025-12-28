@@ -163,19 +163,37 @@ if (!empty($invoice->tenant->authorizedSignature)) {
         //     : null;
 
         // $imagePath = storage_path('app/public/tenant-logos/cons_logo.png');
-$imagePath = storage_path('app/public/' . ltrim($receipt->tenant->tenantLogo, '/'));
-$imageData = base64_encode(file_get_contents($imagePath));
-$imageType = pathinfo($imagePath, PATHINFO_EXTENSION);
-$logoUrl = 'data:image/' . $imageType . ';base64,' . $imageData;
+// $imagePath = storage_path('app/public/' . ltrim($receipt->tenant->tenantLogo, '/'));
+// $imageData = base64_encode(file_get_contents($imagePath));
+// $imageType = pathinfo($imagePath, PATHINFO_EXTENSION);
+// $logoUrl = 'data:image/' . $imageType . ';base64,' . $imageData;
 
-$imagePath = storage_path('app/public/' . ltrim($receipt->tenant->authorizedSignature, '/'));
-$imageData = base64_encode(file_get_contents($imagePath));
-$imageType = pathinfo($imagePath, PATHINFO_EXTENSION);
-$signatureUrl = 'data:image/' . $imageType . ';base64,' . $imageData;
+// $imagePath = storage_path('app/public/' . ltrim($receipt->tenant->authorizedSignature, '/'));
+// $imageData = base64_encode(file_get_contents($imagePath));
+// $imageType = pathinfo($imagePath, PATHINFO_EXTENSION);
+// $signatureUrl = 'data:image/' . $imageType . ';base64,' . $imageData;
 
-        // $signatureUrl = $invoice->tenant->authorizedSignature
-        //     ? $this->getImageUrl($invoice->tenant->authorizedSignature)
-        //     : null;
+/* ---------- LOGO ---------- */
+if (!empty($receipt->tenant->tenantLogo)) {
+    $logoPath = storage_path('app/public/' . ltrim($receipt->tenant->tenantLogo, '/'));
+
+    if (file_exists($logoPath) && is_file($logoPath)) {
+        $logoData = base64_encode(file_get_contents($logoPath));
+        $logoType = pathinfo($logoPath, PATHINFO_EXTENSION);
+        $logoUrl = 'data:image/' . $logoType . ';base64,' . $logoData;
+    }
+}
+
+/* ---------- SIGNATURE ---------- */
+if (!empty($receipt->tenant->authorizedSignature)) {
+    $signaturePath = storage_path('app/public/' . ltrim($receipt->tenant->authorizedSignature, '/'));
+
+    if (file_exists($signaturePath) && is_file($signaturePath)) {
+        $signatureData = base64_encode(file_get_contents($signaturePath));
+        $signatureType = pathinfo($signaturePath, PATHINFO_EXTENSION);
+        $signatureUrl = 'data:image/' . $signatureType . ';base64,' . $signatureData;
+    }
+}
 
         return [
             'invoice' => $receipt,
