@@ -158,9 +158,9 @@ if (!empty($invoice->tenant->authorizedSignature)) {
 
         // Build image URLs
         $baseUrl = config('app.url');
-        // $logoUrl = $invoice->tenant->tenantLogo
-        //     ? $this->getImageUrl($invoice->tenant->tenantLogo)
-        //     : null;
+             $logoUrl = null;
+$signatureUrl = null;
+
 
         // $imagePath = storage_path('app/public/tenant-logos/cons_logo.png');
 // $imagePath = storage_path('app/public/' . ltrim($receipt->tenant->tenantLogo, '/'));
