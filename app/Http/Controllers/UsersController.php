@@ -522,6 +522,7 @@ public function userProfile(Request $request)
         'email' => $user->email,
         'phoneNumber' => $user->phoneNumber,
         'role' => $user->user_role->roleName ?? 'Member', // Get role name with fallback
+        'user_plan' => $user->current_plan->planName ?? 'Free'
 
     ]);
 }

@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LearningController;
+use App\Http\Controllers\SubscriptionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -51,3 +52,4 @@ Route::get('/cover-images/{filename}', function ($filename) {
 
 
 Route::post('/flutterwave/webhook', [WebhookController::class, 'handle'])->withoutMiddleware('csrf');
+Route::get('/subscription/redirect', [SubscriptionController::class, 'handleRedirect']);

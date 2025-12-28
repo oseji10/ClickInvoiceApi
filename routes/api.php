@@ -102,14 +102,36 @@ Route::middleware(['auth.jwt', 'tenant'])->group(function () {
                 'email' => $user->email,
                 'default_tenant' => $user->default_tenant,
                 'tenantId' => $user->currently_active_tenant->tenantId ?? '',
+                'user_plan' => $user->current_plan->planName ?? "",
             ]
         ]);
     });
 
-Route::get('/plans', function(){
-    $plans = Plans::orderBy('planId')->with('currency_detail')->get();
+// Route::get('/plans', function(){
+//     $plans = Plans::orderBy('planId')->with('currency_detail', 'isSubscribed')->get();
+//     return response()->json($plans);
+// });
+
+Route::get('/plans', function () {
+    $user = auth()->user();
+
+    $plans = Plans::orderBy('planId')
+        ->with('currency_detail')
+        ->get()
+        ->map(function ($plan) use ($user) {
+            $plan->is_subscribed = $user
+                ? $plan->subscriptions()
+                    ->where('userId', $user->id)
+                    ->where('status', 'active')
+                    ->exists()
+                : false;
+
+            return $plan;
+        });
+
     return response()->json($plans);
 });
+
 
     Route::get('profile', [UsersController::class, 'userProfile']);
     Route::patch('/profile', [UsersController::class, 'updateUser']);
@@ -205,5 +227,5 @@ Route::prefix('receipts')->group(function () {
     Route::post('/{id}/send-email', [InvoicePdfController::class, 'sendReceiptEmail']);
 });
 
-
 Route::post('/flutterwave/webhook', [WebhookController::class, 'handle']);
+Route::get('/subscription/verify-redirect', [SubscriptionController::class, 'verifyRedirect']);

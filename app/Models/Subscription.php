@@ -50,13 +50,15 @@ class Subscription extends Model
         return $this->belongsTo(User::class, 'userId');
     }
 
-    public function plan()
+      public function plan()
     {
-        return $this->belongsTo(Plan::class, 'planId');
+        return $this->belongsTo(Plans::class, 'planId');
     }
 
     public function payments()
     {
         return $this->hasMany(Payment::class, 'subscriptionId', 'subscriptionId');
     }
+
+    
 }

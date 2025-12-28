@@ -43,17 +43,18 @@ $ngrokUrl = 'https://otiosely-chronological-cari.ngrok-free.dev'; // Your ngrok 
             ->post('https://api.flutterwave.com/v3/payments', [
                 'tx_ref' => $txRef,
                 'amount' => $plan->price, // Overridden by plan, but include for initial charge
-                'currency' => $plan->currency_detail->currencySymbol,
+                'currency' => $plan->currency_detail->currencyCode,
+                'interval' => 'monthly',
                 'payment_plan' => $plan->flutterwavePlanId, // Enables subscription
                 // 'redirect_url' => url('/subscription/redirect'), // Your frontend or backend redirect handler
-                'redirect_url' => $ngrokUrl . '/subscription/redirect',
+                'redirect_url' => env('APP_URL') . '/api/subscription/verify-redirect',
                 'customer' => [
                     'email' => $user->email,
                     'name' => $user->name,
                 ],
                 'customizations' => [
-                    'title' => $plan->name . ' Subscription',
-                    'description' => 'Subscribe to ' . $plan->name,
+                    'title' => 'ClickInvoice ' . $plan->planName . ' Subscription',
+                    'description' => 'Subscribe to ' . $plan->planName,
                 ],
                 'meta' => [
                     'subscriptionId' => $subscription->subscriptionId, // For webhook
@@ -68,6 +69,28 @@ $ngrokUrl = 'https://otiosely-chronological-cari.ngrok-free.dev'; // Your ngrok 
             return response()->json(['error' => 'Failed to initiate payment'], 500);
         }
     }
+
+
+public function verifyRedirect(Request $request)
+{
+    $status = $request->query('status');
+    $txRef = $request->query('tx_ref');
+    $transactionId = $request->query('transaction_id');
+
+    // Optional: Extra security - verify with Flutterwave
+    if ($status === 'successful' && $transactionId) {
+        $response = Http::withToken(env('FLUTTERWAVE_SECRET_KEY'))
+            ->get("https://api.flutterwave.com/v3/transactions/{$transactionId}/verify");
+
+        if ($response->successful() && $response->json('data.status') === 'successful') {
+            // Safe to show success (webhook will have already updated DB)
+            return redirect(env('FRONTEND_URL') . "/subscription/success?tx_ref={$txRef}");
+        }
+    }
+
+    // Failed, cancelled, or verification failed
+    return redirect(env('FRONTEND_URL') . "/subscription/failed?reason={$status}");
+}
 
     // Handle redirect after payment (optional: can be frontend page that polls backend or shows success)
     public function redirect(Request $request)

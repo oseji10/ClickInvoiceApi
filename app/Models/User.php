@@ -96,6 +96,12 @@ class User extends Authenticatable implements JWTSubject
     }
 
 
+    public function current_plan()
+    {
+        return $this->hasOne(Plans::class, 'planId', 'currentPlan');
+    }
+
+
     // Profile relationship
  public function default_tenant()
 {
@@ -135,5 +141,18 @@ public function subscription()
 {
     return $this->hasOne(Subscription::class, 'userId', 'id');
 }
+
+
+public function subscriptions()
+    {
+        return $this->hasMany(Subscription::class, 'userId');
+    }
+
+    public function activeSubscription()
+    {
+        return $this->subscriptions()
+            ->where('status', 'active')
+            ->latest();
+    }
 
 }

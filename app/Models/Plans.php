@@ -16,4 +16,9 @@ class Plans extends Model
     {
         return $this->belongsTo(Currency::class, 'currency', 'currencyId');
     }
+
+    public function subscriptions()
+    {
+        return $this->hasMany(Subscription::class, 'planId');
+    }
 }
