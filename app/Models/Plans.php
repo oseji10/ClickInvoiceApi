@@ -12,7 +12,7 @@ class Plans extends Model
     protected $primaryKey = 'planId';
     protected $fillable = ['planName', 'price', 'currency', 'features', 'isPopular'];
 
-    public function currency()
+    public function currency_detail()
     {
         return $this->belongsTo(Currency::class, 'currency', 'currencyId');
     }

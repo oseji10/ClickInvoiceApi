@@ -107,7 +107,7 @@ Route::middleware(['auth.jwt', 'tenant'])->group(function () {
     });
 
 Route::get('/plans', function(){
-    $plans = Plans::orderBy('planId')->get();
+    $plans = Plans::orderBy('planId')->with('currency_detail')->get();
     return response()->json($plans);
 });
 

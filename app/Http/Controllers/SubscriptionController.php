@@ -12,7 +12,7 @@ class SubscriptionController extends Controller
     public function create(Request $request, $planId)
     {
         $user = auth()->user(); // Or however you get authenticated user
-        $plan = Plans::findOrFail($planId);
+        $plan = Plans::with('currency_detail')->where('planId', $planId)->first();
 
         if (!$plan->flutterwavePlanId) {
             return response()->json(['error' => 'Invalid plan'], 400);
@@ -32,7 +32,7 @@ class SubscriptionController extends Controller
             'status' => 'pending',
         ]);
 
-        $txRef = 'sub-' . $subscription->id . '-' . time();
+        $txRef = 'sub-' . $subscription->subscriptionId . '-' . time();
 
         // Initiate payment on Flutterwave
         // Hardcode for testing; remove in production
@@ -43,8 +43,8 @@ $ngrokUrl = 'https://otiosely-chronological-cari.ngrok-free.dev'; // Your ngrok 
             ->post('https://api.flutterwave.com/v3/payments', [
                 'tx_ref' => $txRef,
                 'amount' => $plan->price, // Overridden by plan, but include for initial charge
-                'currency' => 'NGN',
-                'payment_plan' => $plan->flutterwave_plan_id, // Enables subscription
+                'currency' => $plan->currency_detail->currencySymbol,
+                'payment_plan' => $plan->flutterwavePlanId, // Enables subscription
                 // 'redirect_url' => url('/subscription/redirect'), // Your frontend or backend redirect handler
                 'redirect_url' => $ngrokUrl . '/subscription/redirect',
                 'customer' => [
