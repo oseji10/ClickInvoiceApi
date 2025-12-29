@@ -103,47 +103,47 @@ public function myTenants(Request $request)
         return response()->json($company);
     }
 
-    public function update(Request $request, $id)
-    {
-        // Find the company
-        $company = Company::findOrFail($id);
+    // public function update(Request $request, $id)
+    // {
+    //     // Find the company
+    //     $company = Company::findOrFail($id);
 
-        // Validate the request data
-        $validated = $request->validate([
-            'companyName' => 'required|string|max:255',
-            'companyDescription' => 'required|string',
-            'companyAddress' => 'required|string',
-            'companyEmail' => 'required|email',
-            'companyPhone' => 'nullable|string',
-            'companyWebsite' => 'nullable|url',
-            'companyIndustry' => 'required|string',
-            'companySize' => 'required|string',
-            'companyLocation' => 'required|string',
-            'companyFoundedYear' => 'nullable|integer|min:1900|max:' . date('Y'),
-            'companyStatus' => 'required|in:active,inactive',
-            'companyLogo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // 5MB max
-        ]);
+    //     // Validate the request data
+    //     $validated = $request->validate([
+    //         'companyName' => 'required|string|max:255',
+    //         'companyDescription' => 'required|string',
+    //         'companyAddress' => 'required|string',
+    //         'companyEmail' => 'required|email',
+    //         'companyPhone' => 'nullable|string',
+    //         'companyWebsite' => 'nullable|url',
+    //         'companyIndustry' => 'required|string',
+    //         'companySize' => 'required|string',
+    //         'companyLocation' => 'required|string',
+    //         'companyFoundedYear' => 'nullable|integer|min:1900|max:' . date('Y'),
+    //         'companyStatus' => 'required|in:active,inactive',
+    //         'companyLogo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // 5MB max
+    //     ]);
 
-        // Handle logo upload
-        if ($request->hasFile('companyLogo')) {
-            // Delete old logo if exists
-            if ($company->companyLogo) {
-                Storage::disk('public')->delete($company->companyLogo);
-            }
+    //     // Handle logo upload
+    //     if ($request->hasFile('companyLogo')) {
+    //         // Delete old logo if exists
+    //         if ($company->companyLogo) {
+    //             Storage::disk('public')->delete($company->companyLogo);
+    //         }
 
-            $logoFile = $request->file('companyLogo');
-            $logoPath = $logoFile->store('company-logos', 'public');
-            $validated['companyLogo'] = $logoPath;
-        } else {
-            // Keep the existing logo if no new file is uploaded
-            $validated['companyLogo'] = $company->companyLogo;
-        }
+    //         $logoFile = $request->file('companyLogo');
+    //         $logoPath = $logoFile->store('company-logos', 'public');
+    //         $validated['companyLogo'] = $logoPath;
+    //     } else {
+    //         // Keep the existing logo if no new file is uploaded
+    //         $validated['companyLogo'] = $company->companyLogo;
+    //     }
 
-        // Update the company
-        $company->update($validated);
+    //     // Update the company
+    //     $company->update($validated);
 
-        return response()->json($company, 200);
-    }
+    //     return response()->json($company, 200);
+    // }
 
     public function destroy($id)
     {
@@ -158,7 +158,58 @@ public function myTenants(Request $request)
 
 
 
+public function update(Request $request, $tenantId)
+{
+    // Handle method spoofing (for file uploads)
+    if ($request->has('_method') && strtoupper($request->_method) === 'PUT') {
+        // Laravel will now parse files correctly because it's treated as POST
+    }
 
+    $validated = $request->validate([
+        'tenantName' => 'required|string|max:255',
+        'tenantEmail' => 'required|email|max:255',
+        'tenantPhone' => 'nullable|string|max:20',
+         'tenantLogo' => 'sometimes|file|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+'authorizedSignature' => 'sometimes|file|image|mimes:png,jpg,jpeg,svg|max:2048',
+'timezone' => 'required|string|max:100',
+        'currency' => 'required|exists:currencies,currencyId',
+        'gatewayPreference' => 'required|exists:payment_gateways,gatewayId',
+        'status' => 'sometimes|in:active,inactive',
+    ]);
+
+    $user = auth()->user();
+
+    $tenant = Tenant::where('tenantId', $tenantId)
+        ->where('ownerId', $user->id)
+        ->firstOrFail();
+
+    $updateData = $validated;
+
+    // Handle logo
+    if ($request->hasFile('tenantLogo')) {
+        if ($tenant->tenantLogo) {
+            Storage::disk('public')->delete($tenant->tenantLogo);
+        }
+        $updateData['tenantLogo'] = $request->file('tenantLogo')->store('tenant-logos', 'public');
+        
+    }
+
+    // Handle signature
+    if ($request->hasFile('authorizedSignature')) {
+        if ($tenant->authorizedSignature) {
+            Storage::disk('public')->delete($tenant->authorizedSignature);
+        }
+        $updateData['authorizedSignature'] = $request->file('authorizedSignature')->store('signatures', 'public');
+    }
+
+    $tenant->update($updateData);
+    $tenant->load('currency', 'payment_gateway');
+
+    return response()->json([
+        'message' => 'Business updated successfully',
+        'tenant' => $tenant,
+    ]);
+}
 
 
 public function setDefaultTenant(Request $request, $tenantId)

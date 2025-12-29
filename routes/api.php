@@ -50,6 +50,7 @@ use App\Models\Plans;
 use Tymon\JWTAuth\Claims\Custom;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\WebhookController;
+use App\Http\Controllers\SupportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -137,6 +138,8 @@ Route::get('/plans', function () {
     Route::patch('/profile', [UsersController::class, 'updateUser']);
     Route::patch('/profile/password', [UsersController::class, 'updatePassword']);
 
+     Route::put('/tenants/{tenantId}', [TenantsController::class, 'update']);
+
     Route::patch('/tenants/{tenantId}/set-default', [TenantsController::class, 'setDefaultTenant']);
 
     // User profile routes
@@ -164,7 +167,8 @@ Route::get('/plans', function () {
     Route::get('tenants', [TenantsController::class, 'index']);
     Route::post('tenants', [TenantsController::class, 'store']);
     Route::get('tenants/user-tenants', [TenantsController::class, 'myTenants']);
-
+    // Route::post('/tenants/{tenantId}', [TenantsController::class, 'update']);
+   
     Route::get('customers/tenant', [CustomerController::class, 'getTenantCustomers']);
     Route::post('customers/tenant', [CustomerController::class, 'storeTenantCustomer']);
 
@@ -206,7 +210,9 @@ Route::get('/plans', function () {
 //     Route::post('/{id}/send-email', [InvoicePdfController::class, 'sendEmail']);
 // });
 
-
+Route::get('/support/tickets', [SupportController::class, 'index']);
+Route::post('/support/tickets', [SupportController::class, 'store']);
+Route::post('/support/tickets/{ticketId}/reply', [SupportController::class, 'reply']);
 
 Route::post('/subscribe/{planId}', [SubscriptionController::class, 'create']); // Add auth
 
@@ -229,3 +235,4 @@ Route::prefix('receipts')->group(function () {
 
 Route::post('/flutterwave/webhook', [WebhookController::class, 'handle']);
 Route::get('/subscription/verify-redirect', [SubscriptionController::class, 'verifyRedirect']);
+
