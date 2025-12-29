@@ -25,7 +25,6 @@ class IdentifyTenant
             'roles',
             'stripe/webhook',
             'learning',
-
         ];
 
         $tenantOptionalRoutes = [
@@ -45,15 +44,23 @@ class IdentifyTenant
             return response()->json(['message' => 'Unauthenticated.'], 401);
         }
 
-        // If user has no tenants yet, allow tenant creation route
+        // Allow tenant creation if user has no tenants yet
         $userTenantsCount = $user->default_tenant()->count();
-
         if ($userTenantsCount === 0 && in_array($path, $tenantOptionalRoutes) && $request->isMethod('POST')) {
-            // No tenant yet, but creating one
             return $next($request);
         }
 
-        // For all other cases, tenant ID is required
+        // -------------------------
+        // NEW: Admins bypass tenant
+        // -------------------------
+        $role = $user->user_role->roleName ?? '';
+        $isAdmin = in_array(strtoupper($role), ['ADMIN', 'SUPER_ADMIN', 'SUPERADMIN']);
+        if ($isAdmin) {
+            // Admin does not need tenant ID
+            return $next($request);
+        }
+
+        // For non-admins, tenant ID is required
         $tenantId = $request->header('X-Tenant-ID');
 
         if (!$tenantId) {

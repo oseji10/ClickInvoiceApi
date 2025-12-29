@@ -210,6 +210,9 @@ Route::get('/plans', function () {
 //     Route::post('/{id}/send-email', [InvoicePdfController::class, 'sendEmail']);
 // });
 
+Route::get('/subscribers', [SubscriptionController::class, 'index']);
+
+
 Route::get('/support/tickets', [SupportController::class, 'index']);
 Route::post('/support/tickets', [SupportController::class, 'store']);
 Route::post('/support/tickets/{ticketId}/reply', [SupportController::class, 'reply']);

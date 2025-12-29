@@ -9,6 +9,17 @@ use App\Models\User; // Assuming auth
 
 class SubscriptionController extends Controller
 {
+
+    public function index(Request $request)
+    {
+
+        $subscriptions = Subscription::with('user', 'plan')->get();
+
+        return response()->json([
+            'subscriptions' => $subscriptions,
+        ]);
+    }
+
     public function create(Request $request, $planId)
     {
         $user = auth()->user(); // Or however you get authenticated user
