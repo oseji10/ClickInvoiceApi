@@ -14,6 +14,10 @@ class InvoiceController extends Controller
     /**
      * Store a new invoice with items, optional tax, and amountPaid.
      */
+    public function index(){
+        $invoices = Invoice::with('items', 'currencyDetail', 'customer')->get();
+        return response()->json($invoices);
+    }
     public function store(Request $request)
     {
         $user = Auth::user();
@@ -207,6 +211,20 @@ public function getInvoiceByInvoiceId(Request $request, $invoiceId)
         return response()->json($invoice);
     }
 
+
+    public function getInvoiceByInvoiceIdForAdmin(Request $request, $invoiceId)
+    {
+        // $tenantId = $request->header('X-Tenant-ID');
+        // $userId = Auth::id();
+
+        $invoice = Invoice::with('items', 'currencyDetail', 'tenant', 'customer', 'creator')
+            // ->where('createdBy', $userId)
+            ->where('invoiceId', $invoiceId)
+            // ->where('tenantId', $tenantId)
+            ->get();
+
+        return response()->json($invoice);
+    }
 
     public function getReceiptByReceiptId(Request $request, $receiptId)
     {

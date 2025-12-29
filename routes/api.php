@@ -30,8 +30,8 @@ use App\Http\Controllers\CommodityController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CustomerController as ControllersCustomerController;
-use App\Http\Controllers\FollowController;
-use App\Http\Controllers\JobController;
+use App\Http\Controllers\ResetPasswordController;
+use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\OtpController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\RecruitmentJobApplicationsController;
@@ -74,6 +74,8 @@ Route::post('/logout', [AuthController::class, 'logout']);
 Route::post('/refresh', [AuthController::class, 'refresh']);
 Route::get('/users/profile', [AuthController::class, 'profile'])->middleware('auth.jwt');
 Route::get('/roles', [RolesController::class, 'index']);
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
+Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('api.password.reset');
 
 Route::get('/currencies', function(){
     $currencies = Currency::orderBy('currencyId')->get()->makeHidden([ 'created_at', 'updated_at', 'deleted_at']);
@@ -180,7 +182,9 @@ Route::get('/plans', function () {
     Route::get('/invoices/latest', [InvoiceController::class, 'getLast5UserInvoices']);
     Route::get('/invoices/summary', [InvoiceController::class, 'invoiceSummary']);
 
+    Route::get('/invoices/admin', [InvoiceController::class, 'index']);
     Route::post('/invoices', [InvoiceController::class, 'store']);
+    Route::get('/invoices/{invoiceId}/admin', [InvoiceController::class, 'getInvoiceByInvoiceIdForAdmin']);
 
     // Get all invoices for logged-in user
     Route::get('/invoices', [InvoiceController::class, 'getUserInvoices']);
