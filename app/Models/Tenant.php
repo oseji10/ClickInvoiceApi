@@ -23,7 +23,8 @@ class Tenant extends Model
         'gatewayPreference',
         'ownerId',
         'isDefault',
-        'tenantAddress'
+        'tenantAddress',
+        'status',
     ];
 
     public function currency()

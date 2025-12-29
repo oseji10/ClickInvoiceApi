@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Company;
 use App\Models\Tenant;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-
 use Illuminate\Support\Facades\Auth;
+
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class TenantsController extends Controller
 {
@@ -94,8 +94,7 @@ public function myTenants(Request $request)
 
     public function myCompanies()
     {
-        $company = Company::where('companyStatus', 'active')
-            ->where('createdBy', auth()->id())
+        $company = Company::where('createdBy', auth()->id())
             ->first();
         if (!$company) {
             return response()->json(['message' => 'No companies found'], 404);
@@ -252,6 +251,34 @@ public function setDefaultTenant(Request $request, $tenantId)
     });
 }
 
+public function toggleTenantStatus(Request $request, $tenantId)
+{
+    $validated = $request->validate([
+        'status' => 'required|in:active,inactive',
+    ]);
+
+    $user = auth()->user();
+
+    $tenant = Tenant::where('tenantId', $tenantId)
+        ->where('ownerId', $user->id)
+        ->firstOrFail();
+
+    // 🚫 Prevent disabling the default tenant
+    if ($tenant->isDefault == 1 && $request->status === 'inactive') {
+        return response()->json([
+            'message' => 'You cannot deactivate the default business. Switch to another business or add a new one and make it the default before disabling this',
+        ], 422);
+    }
+
+    $tenant->update([
+        'status' => $request->status,
+    ]);
+
+    return response()->json([
+        'message' => 'Tenant status updated successfully',
+        'tenant' => $tenant,
+    ]);
+}
 
 
 }

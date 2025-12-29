@@ -138,7 +138,8 @@ Route::get('/plans', function () {
     Route::patch('/profile', [UsersController::class, 'updateUser']);
     Route::patch('/profile/password', [UsersController::class, 'updatePassword']);
 
-     Route::put('/tenants/{tenantId}', [TenantsController::class, 'update']);
+    Route::put('/tenants/{tenantId}', [TenantsController::class, 'update']);
+    Route::patch('/tenants/{tenantId}/status', [TenantsController::class, 'toggleTenantStatus']);
 
     Route::patch('/tenants/{tenantId}/set-default', [TenantsController::class, 'setDefaultTenant']);
 
