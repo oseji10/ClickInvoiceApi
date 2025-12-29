@@ -88,6 +88,7 @@ Route::get('/payment-gateways', function(){
 // Stripe webhook (public)
 Route::post('stripe/webhook', [StripeWebhookController::class, 'handle']);
 
+Route::get('/users', [UsersController::class, 'index']);
 Route::middleware(['auth.jwt', 'tenant'])->group(function () {
 
     Route::get('/user', function () {

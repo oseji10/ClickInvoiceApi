@@ -26,12 +26,12 @@ use Illuminate\Validation\Rules\Password;
 
 class UsersController extends Controller
 {
-    // public function index()
-    // {
-    //     $users = User::with('staff.staff_type')->get();
-    //     return response()->json($users);
+    public function index()
+    {
+        $users = User::with('user_role', 'current_plan')->get();
+        return response()->json($users);
 
-    // }
+    }
 
 
 
