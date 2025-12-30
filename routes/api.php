@@ -26,7 +26,7 @@ use App\Http\Controllers\MSPsController;
 use App\Http\Controllers\FarmersController;
 use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\ServicesController;
-use App\Http\Controllers\CommodityController;
+use App\Http\Controllers\UserEmailController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CustomerController as ControllersCustomerController;
@@ -175,6 +175,7 @@ Route::get('/plans', function () {
    
     Route::get('customers/tenant', [CustomerController::class, 'getTenantCustomers']);
     Route::post('customers/tenant', [CustomerController::class, 'storeTenantCustomer']);
+    Route::get('customers/admin', [CustomerController::class, 'index']);
 
 
 
@@ -226,6 +227,9 @@ Route::post('/support/tickets/{ticketId}/reply', [SupportController::class, 'rep
 Route::post('/subscribe/{planId}', [SubscriptionController::class, 'create']); // Add auth
 
 Route::get('/users/{id}/profile', [UsersController::class, 'profile']);
+
+Route::post('/users/{id}/send-email', [UserEmailController::class, 'sendSingle']);
+Route::post('/users/broadcast-email', [UserEmailController::class, 'broadcast']);
 });
 
 Route::prefix('invoices')->group(function () {
