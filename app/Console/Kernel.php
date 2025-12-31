@@ -13,6 +13,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         // $schedule->command('inspire')->hourly();
+        $schedule->command('tickets:close-inactive')->hourly();
     }
 
     /**
@@ -23,5 +24,9 @@ class Kernel extends ConsoleKernel
         $this->load(__DIR__.'/Commands');
 
         require base_path('routes/console.php');
+        
     }
+    protected $commands = [
+    \App\Console\Commands\CloseInactiveTickets::class,
+];
 }

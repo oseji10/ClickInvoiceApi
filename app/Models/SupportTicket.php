@@ -29,5 +29,15 @@ class SupportTicket extends Model
         return $this->hasMany(SupportReply::class, 'ticketId', 'ticketId');
     }
 
+
+    /**
+     * Scope to find tickets inactive for more than 48 hours
+     */
+    public function scopeInactiveFor48Hours($query)
+    {
+        return $query->whereIn('status', ['open', 'in_progress'])
+                     ->where('updated_at', '<', Carbon::now()->subHours(48));
+    }
+
     
 };

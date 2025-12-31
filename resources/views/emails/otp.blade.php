@@ -5,7 +5,7 @@
 </head>
 <body>
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #2563eb;">ClickInvoice - Email Verification</h2>
+        <h2 style="color: #0A66C2;">ClickInvoice - Email Verification</h2>
 
         <p>Hello,</p>
 

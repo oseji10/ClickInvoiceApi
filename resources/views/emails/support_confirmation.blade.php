@@ -35,12 +35,12 @@
 
             <p>We typically respond within <strong>24 hours</strong>. You'll get an email notification when we reply.</p>
 
-            <p>Thanks for using ClickInvoice!<br>The ClickInvoice Team ❤️</p>
+            <p>Thanks for using ClickInvoice!<br>The ClickInvoice Team </p>
         </div>
 
         <div class="footer">
             <p>&copy; {{ date('Y') }} ClickInvoice. All rights reserved.</p>
-            <p>Made with love for businesses in Africa and beyond.</p>
+            {{-- <p>Made with love for businesses in Africa and beyond.</p> --}}
         </div>
     </div>
 </body>

@@ -223,6 +223,9 @@ Route::get('/subscribers', [SubscriptionController::class, 'index']);
 Route::get('/support/tickets', [SupportController::class, 'index']);
 Route::post('/support/tickets', [SupportController::class, 'store']);
 Route::post('/support/tickets/{ticketId}/reply', [SupportController::class, 'reply']);
+Route::post('/support/tickets/{ticketId}/admin-reply', [SupportController::class, 'adminReply']);
+Route::get('/support/tickets/all', [SupportController::class, 'indexAdmin']);
+Route::patch('/support/tickets/{ticketId}/status', [SupportController::class, 'updateTicketStatus']);
 
 Route::post('/subscribe/{planId}', [SubscriptionController::class, 'create']); // Add auth
 

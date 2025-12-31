@@ -6,7 +6,7 @@
     <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background-color: #1e40af; color: white; padding: 20px; text-align: center; }
+        .header { background-color: #0A66C2; color: white; padding: 20px; text-align: center; }
         .content { padding: 20px; background-color: #f9fafb; }
         .footer { margin-top: 20px; padding: 10px; text-align: center; color: #666; font-size: 12px; }
     </style>
