@@ -154,6 +154,31 @@ class InvoiceController extends Controller
 }
 
 
+// public function invoiceSummary(Request $request)
+// {
+//     $tenantId = $request->header('X-Tenant-ID');
+//     $userId = Auth::id();
+
+//     if (!$tenantId) {
+//         return response()->json([
+//             'message' => 'Tenant ID is missing'
+//         ], 400);
+//     }
+
+//     $summary = Invoice::where('tenantId', $tenantId)
+//         ->where('createdBy', $userId)
+//         ->selectRaw('
+//             COALESCE(SUM(amountPaid), 0) as collected,
+//             COALESCE(SUM(balanceDue), 0) as outstanding
+//         ')
+//         ->first();
+
+//     return response()->json([
+//         'collected' => (float) $summary->collected,
+//         'outstanding' => (float) $summary->outstanding,
+//     ]);
+
+
 public function invoiceSummary(Request $request)
 {
     $tenantId = $request->header('X-Tenant-ID');
@@ -165,18 +190,53 @@ public function invoiceSummary(Request $request)
         ], 400);
     }
 
-    $summary = Invoice::where('tenantId', $tenantId)
+    // 1. Get the aggregated amounts
+    $amounts = Invoice::where('tenantId', $tenantId)
         ->where('createdBy', $userId)
         ->selectRaw('
-            COALESCE(SUM(amountPaid), 0) as collected,
-            COALESCE(SUM(balanceDue), 0) as outstanding
+            COALESCE(SUM(amountPaid), 0) AS collected,
+            COALESCE(SUM(balanceDue), 0) AS outstanding
         ')
         ->first();
 
+    // 2. Get currency from any one invoice (preferably the latest)
+    $currencyInfo = Invoice::where('tenantId', $tenantId)
+        ->where('createdBy', $userId)
+        ->join('currencies', 'invoices.currency', '=', 'currencies.currencyId')
+        ->select('currencies.currencyCode AS currency_code', 'currencies.currencySymbol AS currency_symbol')
+        ->orderBy('invoices.created_at', 'desc') // get from most recent invoice
+        ->first();
+
+    // If no invoices exist
+    if (!$amounts) {
+        return response()->json([
+            'collected'       => 0.0,
+            'outstanding'     => 0.0,
+            'currency_code'   => 'USD',
+            'currency_symbol' => '$',
+        ]);
+    }
+
     return response()->json([
-        'collected' => (float) $summary->collected,
-        'outstanding' => (float) $summary->outstanding,
+        'collected'       => (float) $amounts->collected,
+        'outstanding'     => (float) $amounts->outstanding,
+        'currency_code'   => $currencyInfo?->currency_code ?? 'USD',
+        'currency_symbol' => $currencyInfo?->currency_symbol ?? $this->getFallbackSymbol($currencyInfo?->currency_code ?? 'USD'),
     ]);
+}
+
+private function getFallbackSymbol(string $code): string
+{
+    return match (strtoupper($code)) {
+        'USD' => '$',
+        'EUR' => '€',
+        'GBP' => '£',
+        'NGN' => '₦',
+        'GHS' => 'GH₵',
+        'ZAR' => 'R',
+        'KES' => 'KSh',
+        default => strtoupper($code),
+    };
 }
 
 
