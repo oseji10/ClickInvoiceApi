@@ -24,11 +24,16 @@ class SupportTicket extends Model
         return $this->belongsTo(User::class, 'userId', 'id');
     }
 
-    public function replies()
-    {
-        return $this->hasMany(SupportReply::class, 'ticketId', 'ticketId');
-    }
+    // public function replies()
+    // {
+    //     return $this->hasMany(SupportReply::class, 'ticketId', 'ticketId');
+    // }
 
+    public function replies()
+{
+    return $this->hasMany(SupportReply::class, 'ticketId', 'ticketId')
+                ->orderBy('created_at', 'asc'); // Always oldest first
+}
 
     /**
      * Scope to find tickets inactive for more than 48 hours

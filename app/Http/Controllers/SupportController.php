@@ -18,23 +18,86 @@ class SupportController extends Controller
 
 
 
+// public function index()
+// {
+//     $user = Auth::user();
+
+//     $tickets = SupportTicket::where('userId', $user->id)
+//         ->with(['replies' => fn($q) => $q->latest()->take(1)])
+//         ->orderBy('updated_at', 'desc')
+//         ->get()
+//         ->map(function ($ticket) {
+//             $lastReply = $ticket->replies->first();
+//             $ticket->last_reply = $lastReply?->message;
+//             $ticket->last_reply_by_admin = $lastReply?->is_admin ?? false;
+//             return $ticket;
+//         });
+
+//     return response()->json(['tickets' => $tickets]);
+// }
+
+
 public function index()
 {
     $user = Auth::user();
 
     $tickets = SupportTicket::where('userId', $user->id)
-        ->with(['replies' => fn($q) => $q->latest()->take(1)])
+        ->with(['replies']) // Load ALL replies, not just the latest one
         ->orderBy('updated_at', 'desc')
         ->get()
         ->map(function ($ticket) {
-            $lastReply = $ticket->replies->first();
+            // Sort replies chronologically: oldest → newest
+            $sortedReplies = $ticket->replies
+                ->sortBy('created_at')
+                ->values();
+
+            // Add preview of last reply (optional, for list view)
+            $lastReply = $sortedReplies->last();
             $ticket->last_reply = $lastReply?->message;
             $ticket->last_reply_by_admin = $lastReply?->is_admin ?? false;
+
+            // Replace replies with properly sorted collection
+            $ticket->replies = $sortedReplies;
+
             return $ticket;
         });
 
     return response()->json(['tickets' => $tickets]);
 }
+
+/**
+ * Get all support tickets (Admin only)
+ */
+// public function indexAdmin()
+// {
+//     // Optional: Add policy or middleware to ensure only admins can access this
+//     // e.g., $this->authorize('viewAny', SupportTicket::class);
+
+//     $tickets = SupportTicket::with(['user', 'replies']) // Load user and all replies
+//         ->orderBy('updated_at', 'desc')
+//         ->get()
+//         ->map(function ($ticket) {
+//             // Include user info (name, email) directly on the ticket for frontend convenience
+//             $ticket->user = [
+//                 'name' => $ticket->user->name,
+//                 'email' => $ticket->user->email,
+//             ];
+
+//             // Optional: Add last reply preview (like in user version)
+//             $lastReply = $ticket->replies->sortByDesc('created_at')->first();
+//             $ticket->last_reply = $lastReply?->message;
+//             $ticket->last_reply_by_admin = $lastReply?->is_admin ?? false;
+
+//             // Ensure replies are ordered chronologically (oldest first)
+//             $ticket->replies = $ticket->replies->sortBy('created_at')->values();
+
+//             return $ticket;
+//         });
+
+//     return response()->json([
+//         'tickets' => $tickets
+//     ]);
+// }
 
 
 /**
@@ -42,33 +105,33 @@ public function index()
  */
 public function indexAdmin()
 {
-    // Optional: Add policy or middleware to ensure only admins can access this
-    // e.g., $this->authorize('viewAny', SupportTicket::class);
-
-    $tickets = SupportTicket::with(['user', 'replies']) // Load user and all replies
+    $tickets = SupportTicket::with(['user', 'replies'])
         ->orderBy('updated_at', 'desc')
         ->get()
         ->map(function ($ticket) {
-            // Include user info (name, email) directly on the ticket for frontend convenience
+            // Extract user info
             $ticket->user = [
                 'name' => $ticket->user->name,
                 'email' => $ticket->user->email,
             ];
 
-            // Optional: Add last reply preview (like in user version)
-            $lastReply = $ticket->replies->sortByDesc('created_at')->first();
-            $ticket->last_reply = $lastReply?->message;
+            // Sort replies chronologically: oldest first → newest last
+            $sortedReplies = $ticket->replies
+                ->sortBy('created_at')
+                ->values();
+
+            // Last reply preview (optional)
+            $lastReply = $sortedReplies->last();
+            $ticket->last_reply = $lastReply?->message ?? null;
             $ticket->last_reply_by_admin = $lastReply?->is_admin ?? false;
 
-            // Ensure replies are ordered chronologically (oldest first)
-            $ticket->replies = $ticket->replies->sortBy('created_at')->values();
+            // Critical: Use sorted replies
+            $ticket->replies = $sortedReplies;
 
             return $ticket;
         });
 
-    return response()->json([
-        'tickets' => $tickets
-    ]);
+    return response()->json(['tickets' => $tickets]);
 }
 
 public function store(Request $request)
