@@ -31,8 +31,8 @@ class SubscriptionController extends Controller
 
         // Check if user already has active subscription
         $existingSub = $user->subscription;
-        if ($existingSub && $existingSub->status === 'active') {
-            return response()->json(['error' => 'You already have an active subscription'], 400);
+        if ($existingSub && $existingSub->status === 'active' && $existingSub->planId == $plan->planId) {
+            return response()->json(['error' => 'You already have an active subscription on this plan'], 400);
         }
 
         // Create pending subscription record
