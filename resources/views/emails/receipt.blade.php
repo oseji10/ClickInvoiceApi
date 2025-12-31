@@ -7,7 +7,7 @@
         body { font-family: Arial, sans-serif; line-height: 1.6; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
         .header {
-            background-color: #16a34a; /* Green theme for receipts */
+            background-color: #0A66C2; /* Blue theme for receipts */
             color: white;
             padding: 20px;
             text-align: center;
@@ -18,7 +18,7 @@
 </head>
 <body>
     <div class="container">
-        <img src="{{ asset('images/logo.svg') }}" alt="Company Logo" style="max-width: 150px; display: block; margin: 0 auto 10px;">
+        <img src="https://app.clickinvoice.app/images/logo/logo-dark.svg" alt="Company Logo" style="max-width: 150px; display: block; margin: 0 auto 10px;">
 
         <div class="header">
             <h1>Payment Receipt</h1>

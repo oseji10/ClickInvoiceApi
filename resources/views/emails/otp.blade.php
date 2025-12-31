@@ -5,7 +5,7 @@
 </head>
 <body>
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-    <img src="{{ asset('images/logo.svg') }}" alt="Company Logo" style="max-width: 150px; display: block; margin: 0 auto 10px;">
+    <img src="https://app.clickinvoice.app/images/logo/logo-dark.svg" alt="Company Logo" style="max-width: 150px; display: block; margin: 0 auto 10px;">
 
         <h2 style="color: #0A66C2;">ClickInvoice - Email Verification</h2>
 

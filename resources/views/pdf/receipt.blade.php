@@ -45,7 +45,7 @@
             font-size: 22px;
             font-weight: bold;
             margin-bottom: 8px;
-            color: #16a34a; /* Green theme for receipt */
+            color: #0A66C2; /* Blue theme for receipt */
             white-space: normal;
             word-wrap: break-word;
         }
@@ -55,7 +55,7 @@
             font-weight: bold;
             margin-bottom: 10px;
             text-align: center;
-            color: #16a34a;
+            color: #0A66C2;
         }
 
         .receipt-number {
@@ -100,7 +100,7 @@
         }
 
         .table th {
-            background-color: #f0fdf4; /* Light green header */
+            background-color: #3c638aff; /* Light green header */
             text-align: left;
             padding: 12px;
             border-bottom: 1px solid #e5e7eb;
@@ -116,7 +116,7 @@
         }
 
         .total-row {
-            background-color: #dcfce7; /* Softer green */
+            background-color: #0A66C2; /* Softer green */
             font-weight: bold;
             font-size: 12px;
         }

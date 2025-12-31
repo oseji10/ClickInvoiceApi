@@ -16,7 +16,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <img src="{{ asset('images/logo.svg') }}" alt="ClickInvoice" width="180">
+            <img src="https://app.clickinvoice.app/images/logo/logo-dark.svg" alt="ClickInvoice" width="180">
         </div>
 
         <div class="content">
@@ -31,7 +31,7 @@
             </div>
 
             <p>You can view and reply to this ticket anytime directly in your ClickInvoice dashboard:</p>
-            <a href="https://app.clickinvoice.app/support" class="btn">View Your Tickets</a>
+            <a href="https://app.clickinvoice.app" class="btn">View Your Tickets</a>
 
             <p>We typically respond within <strong>24 hours</strong>. You'll get an email notification when we reply.</p>
 
