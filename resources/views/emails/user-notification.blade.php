@@ -17,7 +17,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <img src="https://app.clickinvoice.app/images/logo/logo-dark.svg" alt="ClickInvoice" width="180">
+            <img src="https://app.clickinvoice.app/images/logo/logo-dark.png" alt="ClickInvoice" width="180">
         </div>
 
         <div class="content">

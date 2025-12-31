@@ -13,7 +13,7 @@
 </head>
 <body>
   <div class="container">
-    <img src="https://app.clickinvoice.app/images/logo/logo-dark.svg" alt="ClickInvoice Logo" style="max-width: 150px; display: block; margin: 0 auto 10px;">
+    <img src="https://app.clickinvoice.app/images/logo/logo-dark.png" alt="ClickInvoice Logo" style="max-width: 150px; display: block; margin: 0 auto 10px;">
 
   <div class="content">
     <h2>Welcome to {{ $appName }}, {{ $user->name }}!</h2>

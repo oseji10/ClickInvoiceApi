@@ -18,7 +18,7 @@
 </head>
 <body>
     <div class="container">
-        <img src="https://app.clickinvoice.app/images/logo/logo-dark.svg" alt="Company Logo" style="max-width: 150px; display: block; margin: 0 auto 10px;">
+        <img src="https://app.clickinvoice.app/images/logo/logo-dark.png" alt="Company Logo" style="max-width: 150px; display: block; margin: 0 auto 10px;">
 
         <div class="header">
             <h1>Payment Receipt</h1>
