@@ -96,10 +96,17 @@ class User extends Authenticatable implements JWTSubject
     }
 
 
+
+
     public function current_plan()
     {
         return $this->hasOne(Plans::class, 'planId', 'currentPlan');
     }
+
+    public function plan()
+{
+    return $this->belongsTo(Plans::class, 'currentPlan', 'planId');
+}
 
 
     // Profile relationship
@@ -121,21 +128,62 @@ public function invoices()
         return $this->hasMany(Invoice::class, 'createdBy', 'id'); // Or direct if invoices belong to users
     }
 
+    public function tenants()
+{
+    return $this->hasMany(Tenant::class, 'ownerId', 'id');
+}
+
+
+// public function canCreateTenant(): bool
+//     {
+//         if ($this->currentPlan === "2") {
+//             return true;
+//         }
+//         return $this->default_tenant()->count() < 2;
+//     }
+
 public function canCreateTenant(): bool
-    {
-        if ($this->currentPlan === "2") {
-            return true;
-        }
-        return $this->default_tenant()->count() < 2;
+{
+    $plan = $this->plan;
+
+    // No plan assigned → deny by default
+    if (!$plan) {
+        return false;
     }
 
-    public function canCreateInvoice(): bool
-    {
-        if ($this->currentPlan === "2") {
-            return true;
-        }
-        return $this->invoices()->count() < 3;
+    // Unlimited tenants
+    if ($plan->tenantLimit === null) {
+        return true;
     }
+
+    return $this->tenants()->count() < $plan->tenantLimit;
+}
+
+    // public function canCreateInvoice(): bool
+    // {
+    //     if ($this->currentPlan === "2") {
+    //         return true;
+    //     }
+    //     return $this->invoices()->count() < 3;
+    // }
+
+
+    public function canCreateInvoice(): bool
+{
+    $plan = $this->plan;
+
+    // No plan assigned → deny by default
+    if (!$plan) {
+        return false;
+    }
+
+    // Unlimited tenants
+    if ($plan->invoiceLimit === null) {
+        return true;
+    }
+
+    return $this->invoices()->count() < $plan->invoiceLimit;
+}
 
 public function subscription()
 {
