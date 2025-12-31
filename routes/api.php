@@ -219,7 +219,7 @@ Route::get('/plans', function () {
 
 Route::get('/subscribers', [SubscriptionController::class, 'index']);
 
-
+// Support Routes
 Route::get('/support/tickets', [SupportController::class, 'index']);
 Route::post('/support/tickets', [SupportController::class, 'store']);
 Route::post('/support/tickets/{ticketId}/reply', [SupportController::class, 'reply']);
