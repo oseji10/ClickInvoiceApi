@@ -36,7 +36,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <img src="{{ asset('images/clickinvoice-logo.png') }}" alt="ClickInvoice" width="180">
+            <img src="{{ asset('images/logo.svg') }}" alt="ClickInvoice" width="180">
         </div>
 
         <div class="content">
