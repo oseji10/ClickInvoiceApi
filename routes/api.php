@@ -205,6 +205,9 @@ Route::get('/plans', function () {
     Route::get('/customers/{customerId}/invoices-and-receipt', [InvoiceController::class, 'getInvoiceAndReceiptsByCustomerId']);
    Route::post('/customers/{customerId}/send-email', [CustomerController::class, 'sendSingleEmail']);
     Route::post('/customers/broadcast-email', [CustomerController::class, 'broadcastEmail']);
+
+    Route::get('/invoices/{customerId}/invoices', [InvoiceController::class, 'getInvoicesForCustomer']);
+    Route::get('/invoices/{customerId}/receipts', [InvoiceController::class, 'getReceiptsForCustomer']);
     // Route::get('/invoices/{invoiceId}', [InvoiceController::class, 'show'])
     // ->where('invoiceId', '[A-Za-z0-9\-]+');
 

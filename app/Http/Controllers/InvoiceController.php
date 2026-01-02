@@ -315,6 +315,51 @@ public function getInvoiceAndReceiptsByCustomerId(Request $request, $customerId)
     }
 
 
+    // public function getInvoiceAndReceiptsByCustomerId(Request $request, $customerId)
+    // {
+    //     $tenantId = $request->header('X-Tenant-ID');
+    //     $userId = Auth::id();
+
+    //     $invoice = Invoice::with('items', 'currencyDetail', 'tenant', 'customer')
+    //         ->where('createdBy', $userId)
+    //         ->where('customerId', $customerId)
+    //         ->where('tenantId', $tenantId)
+    //         ->get();
+
+    //     return response()->json($invoice);
+    // }
+
+
+    public function getInvoicesForCustomer(Request $request, $customerId)
+    {
+        $tenantId = $request->header('X-Tenant-ID');
+        $userId = Auth::id();
+
+        $invoices = Invoice::with('items', 'currencyDetail', 'tenant', 'customer')
+            ->where('createdBy', $userId)
+            ->where('customerId', $customerId)
+            ->where('status', 'UNPAID')
+            ->where('tenantId', $tenantId)
+            ->get();
+
+        return response()->json($invoices);
+    }
+
+
+public function getReceiptsForCustomer(Request $request, $customerId)
+{
+    $tenantId = $request->header('X-Tenant-ID');
+    $userId = Auth::id();
+
+    $receipts = Invoice::with(['items', 'currencyDetail', 'tenant', 'customer'])
+        ->where('createdBy', $userId)
+        ->where('customerId', $customerId)
+        ->whereIn('status', ['PAID', 'PARTIAL_PAYMENT'])
+        ->where('tenantId', $tenantId)
+        ->get();
+
+    return response()->json($receipts);
+}
 
 
 
