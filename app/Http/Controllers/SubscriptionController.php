@@ -13,7 +13,7 @@ class SubscriptionController extends Controller
     public function index(Request $request)
     {
 
-        $subscriptions = Subscription::with('user', 'plan')->get();
+        $subscriptions = Subscription::with('user', 'plan.currency_detail')->get();
 
         return response()->json([
             'subscriptions' => $subscriptions,

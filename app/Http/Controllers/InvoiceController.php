@@ -250,14 +250,17 @@ public function adminInvoiceSummary(Request $request)
     $summaries = Invoice::query()
         ->leftJoin('currencies', 'invoices.currency', '=', 'currencies.currencyId')
         ->selectRaw('
-            invoices.currency AS currency_code,
+            currencies.currencyCode AS currency_code,
+            currencies.currencySymbol AS currency_symbol,
+            currencies.country AS country,
             currencies.currencySymbol AS currency_symbol,
             SUM(invoices.amountPaid)  AS collected,
             SUM(invoices.balanceDue) AS outstanding
         ')
         ->groupBy(
-            'invoices.currency',
-            'currencies.currencySymbol'
+            'currencies.currencyCode',
+            'currencies.currencySymbol',
+            'currencies.country',
         )
         ->get();
 
@@ -266,6 +269,7 @@ public function adminInvoiceSummary(Request $request)
             'currency_code'   => $row->currency_code,
             'currency_symbol' => $row->currency_symbol
                 ?? $this->getFallbackSymbol($row->currency_code),
+            'country'         => $row->country,
             'collected'       => (float) $row->collected,
             'outstanding'     => (float) $row->outstanding,
         ])
