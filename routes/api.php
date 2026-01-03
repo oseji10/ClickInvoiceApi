@@ -87,8 +87,13 @@ Route::get('/payment-gateways', function(){
     return response()->json($gateways);
 });
 
-// Stripe webhook (public)
-Route::post('stripe/webhook', [StripeWebhookController::class, 'handle']);
+Route::get('/invoices/admin-summary', [InvoiceController::class, 'adminInvoiceSummary']);
+Route::get('/admin/invoice-status-breakdown', [InvoiceController::class, 'invoiceStatusBreakdown']);
+Route::get('/admin/top-tenants', [InvoiceController::class, 'topTenants']);
+Route::get('/admin/revenue-trends', [InvoiceController::class, 'revenueTrends']);
+Route::get('/admin/payment-method-breakdown', [InvoiceController::class, 'paymentMethodBreakdown']);
+Route::get('/admin/overdue-invoices-summary', [InvoiceController::class, 'overdueInvoicesSummary']);
+Route::get('/admin/currency-distribution', [InvoiceController::class, 'currencyDistribution']);
 
 Route::get('/users', [UsersController::class, 'index']);
 Route::middleware(['auth.jwt', 'tenant'])->group(function () {
@@ -134,7 +139,7 @@ Route::get('/plans', function () {
         });
 
     return response()->json($plans);
-});
+    });
 
 
     Route::get('profile', [UsersController::class, 'userProfile']);
@@ -182,7 +187,7 @@ Route::get('/plans', function () {
     // Create a new invoice
     Route::get('/invoices/latest', [InvoiceController::class, 'getLast5UserInvoices']);
     Route::get('/invoices/summary', [InvoiceController::class, 'invoiceSummary']);
-
+    
     Route::get('/invoices/admin', [InvoiceController::class, 'index']);
     Route::post('/invoices', [InvoiceController::class, 'store']);
     Route::get('/invoices/{invoiceId}/admin', [InvoiceController::class, 'getInvoiceByInvoiceIdForAdmin']);
@@ -203,7 +208,7 @@ Route::get('/plans', function () {
 
     Route::get('/customers', [CustomerController::class, 'getTenantCustomers']);
     Route::get('/customers/{customerId}/invoices-and-receipt', [InvoiceController::class, 'getInvoiceAndReceiptsByCustomerId']);
-   Route::post('/customers/{customerId}/send-email', [CustomerController::class, 'sendSingleEmail']);
+    Route::post('/customers/{customerId}/send-email', [CustomerController::class, 'sendSingleEmail']);
     Route::post('/customers/broadcast-email', [CustomerController::class, 'broadcastEmail']);
 
     Route::get('/invoices/{customerId}/invoices', [InvoiceController::class, 'getInvoicesForCustomer']);
@@ -212,30 +217,30 @@ Route::get('/plans', function () {
     // ->where('invoiceId', '[A-Za-z0-9\-]+');
 
 
-    // PDF routes
-// Route::prefix('invoices')->group(function () {
-//     Route::get('/{id}/pdf', [InvoicePdfController::class, 'download']);
-//     Route::get('/{id}/stream-pdf', [InvoicePdfController::class, 'stream']);
-//     Route::get('/{id}/generate-pdf', [InvoicePdfController::class, 'generate']);
-//     Route::post('/{id}/send-email', [InvoicePdfController::class, 'sendEmail']);
-// });
+        // PDF routes
+    // Route::prefix('invoices')->group(function () {
+    //     Route::get('/{id}/pdf', [InvoicePdfController::class, 'download']);
+    //     Route::get('/{id}/stream-pdf', [InvoicePdfController::class, 'stream']);
+    //     Route::get('/{id}/generate-pdf', [InvoicePdfController::class, 'generate']);
+    //     Route::post('/{id}/send-email', [InvoicePdfController::class, 'sendEmail']);
+    // });
 
-Route::get('/subscribers', [SubscriptionController::class, 'index']);
+    Route::get('/subscribers', [SubscriptionController::class, 'index']);
 
-// Support Routes
-Route::get('/support/tickets', [SupportController::class, 'index']);
-Route::post('/support/tickets', [SupportController::class, 'store']);
-Route::post('/support/tickets/{ticketId}/reply', [SupportController::class, 'reply']);
-Route::post('/support/tickets/{ticketId}/admin-reply', [SupportController::class, 'adminReply']);
-Route::get('/support/tickets/all', [SupportController::class, 'indexAdmin']);
-Route::patch('/support/tickets/{ticketId}/status', [SupportController::class, 'updateTicketStatus']);
+    // Support Routes
+    Route::get('/support/tickets', [SupportController::class, 'index']);
+    Route::post('/support/tickets', [SupportController::class, 'store']);
+    Route::post('/support/tickets/{ticketId}/reply', [SupportController::class, 'reply']);
+    Route::post('/support/tickets/{ticketId}/admin-reply', [SupportController::class, 'adminReply']);
+    Route::get('/support/tickets/all', [SupportController::class, 'indexAdmin']);
+    Route::patch('/support/tickets/{ticketId}/status', [SupportController::class, 'updateTicketStatus']);
 
-Route::post('/subscribe/{planId}', [SubscriptionController::class, 'create']); // Add auth
+    Route::post('/subscribe/{planId}', [SubscriptionController::class, 'create']); // Add auth
 
-Route::get('/users/{id}/profile', [UsersController::class, 'profile']);
+    Route::get('/users/{id}/profile', [UsersController::class, 'profile']);
 
-Route::post('/users/{id}/send-email', [UserEmailController::class, 'sendSingle']);
-Route::post('/users/broadcast-email', [UserEmailController::class, 'broadcast']);
+    Route::post('/users/{id}/send-email', [UserEmailController::class, 'sendSingle']);
+    Route::post('/users/broadcast-email', [UserEmailController::class, 'broadcast']);
 });
 
 Route::prefix('invoices')->group(function () {

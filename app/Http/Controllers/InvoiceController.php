@@ -8,6 +8,7 @@ use App\Models\InvoiceItem;
 use App\Models\Tenant;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class InvoiceController extends Controller
 {
@@ -239,6 +240,37 @@ private function getFallbackSymbol(string $code): string
     };
 }
 
+
+
+public function adminInvoiceSummary(Request $request)
+{
+    // IMPORTANT: disable tenant scope if it exists
+    Invoice::withoutGlobalScopes();
+
+    $summaries = Invoice::query()
+        ->leftJoin('currencies', 'invoices.currency', '=', 'currencies.currencyId')
+        ->selectRaw('
+            invoices.currency AS currency_code,
+            currencies.currencySymbol AS currency_symbol,
+            SUM(invoices.amountPaid)  AS collected,
+            SUM(invoices.balanceDue) AS outstanding
+        ')
+        ->groupBy(
+            'invoices.currency',
+            'currencies.currencySymbol'
+        )
+        ->get();
+
+    return response()->json(
+        $summaries->map(fn ($row) => [
+            'currency_code'   => $row->currency_code,
+            'currency_symbol' => $row->currency_symbol
+                ?? $this->getFallbackSymbol($row->currency_code),
+            'collected'       => (float) $row->collected,
+            'outstanding'     => (float) $row->outstanding,
+        ])
+    );
+}
 
 
     /**
@@ -493,6 +525,111 @@ public function updateInvoiceStatus(Request $request, $invoiceId)
         'message' => 'Invoice updated successfully',
         'invoice' => $invoice
     ]);
+}
+
+//ANALYTICS DATA   /**
+public function invoiceStatusBreakdown()
+{
+    $data = Invoice::query()
+        ->withoutGlobalScopes()
+        ->selectRaw('status, COUNT(*) as count')
+        ->groupBy('status')
+        ->get();
+
+    return response()->json($data);
+}
+
+
+
+public function overdueInvoicesSummary()
+{
+    $today = Carbon::today();
+
+    $data = [
+        '1_7_days' => Invoice::withoutGlobalScopes()
+            ->where('status', 'overdue')
+            ->whereBetween('dueDate', [
+                $today->copy()->subDays(7),
+                $today->copy()->subDay()
+            ])->count(),
+
+        '8_30_days' => Invoice::withoutGlobalScopes()
+            ->where('status', 'overdue')
+            ->whereBetween('dueDate', [
+                $today->copy()->subDays(30),
+                $today->copy()->subDays(8)
+            ])->count(),
+
+        '31_plus_days' => Invoice::withoutGlobalScopes()
+            ->where('status', 'overdue')
+            ->where('dueDate', '<', $today->copy()->subDays(30))
+            ->count(),
+    ];
+
+    return response()->json($data);
+}
+
+
+public function currencyDistribution()
+{
+    $data = Invoice::query()
+        ->withoutGlobalScopes()
+        ->join('currencies', 'invoices.currency', '=', 'currencies.currencyId')
+        ->selectRaw('
+            currencies.currencyCode as currency,
+            SUM(invoices.amountPaid) as total
+        ')
+        ->groupBy('currencies.currencyCode')
+        ->orderByDesc('total')
+        ->get();
+
+    return response()->json($data);
+}
+
+
+public function topTenants()
+{
+    $data = Invoice::query()
+        ->withoutGlobalScopes()
+        ->join('tenants', 'invoices.tenantId', '=', 'tenants.tenantId')
+        ->selectRaw('
+            tenants.tenantName,
+            SUM(invoices.amountPaid) as revenue
+        ')
+        ->groupBy('tenants.tenantId', 'tenants.tenantName')
+        ->orderByDesc('revenue')
+        ->limit(5)
+        ->get();
+
+    return response()->json($data);
+}
+
+
+public function revenueTrends()
+{
+    $data = Invoice::query()
+        ->withoutGlobalScopes()
+        ->where('status', 'paid')
+        ->selectRaw('
+            DATE_FORMAT(created_at, "%Y-%m") as period,
+            SUM(amountPaid) as revenue
+        ')
+        ->groupBy('period')
+        ->orderBy('period')
+        ->get();
+
+    return response()->json($data);
+}
+
+public function paymentMethodBreakdown()
+{
+    $data = Invoice::query()
+        ->withoutGlobalScopes()
+        ->selectRaw('paymentMethod, COUNT(*) as count')
+        ->groupBy('paymentMethod')
+        ->get();
+
+    return response()->json($data);
 }
 
 
