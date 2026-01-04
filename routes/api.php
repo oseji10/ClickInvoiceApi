@@ -87,6 +87,11 @@ Route::get('/payment-gateways', function(){
     return response()->json($gateways);
 });
 
+Route::get('/subscription-plans', function(){
+    $plans = Plans::with('currency_detail')->orderBy('planId')->get()->makeHidden([ 'created_at', 'updated_at', 'deleted_at']);
+    return response()->json($plans);
+});
+
 Route::get('/invoices/admin-summary', [InvoiceController::class, 'adminInvoiceSummary']);
 Route::get('/admin/invoice-status-breakdown', [InvoiceController::class, 'invoiceStatusBreakdown']);
 Route::get('/admin/top-tenants', [InvoiceController::class, 'topTenants']);
