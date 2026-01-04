@@ -146,7 +146,83 @@ Route::get('/plans', function () {
     return response()->json($plans);
     });
 
+    Route::patch('/subscription-plans/{planId}', function ($planId) {
+        
+        $validatedData = request()->validate([
+            'planName' => 'sometimes|string|max:255',
+            'price' => 'sometimes|numeric',
+            'currency' => 'sometimes|integer|exists:currencies,currencyId',
+            'features' => 'sometimes|string',
+            'isPopular' => 'sometimes|boolean',
+            'tenantLimit' => 'sometimes|integer',
+            'invoiceLimit' => 'sometimes|integer',
+        ]);
+        Plans::where('planId', $planId)->update($validatedData);
+        return response()->json(['message' => 'Plan updated successfully']);
+    });
 
+    Route::post('/subscription-plans', function () {
+        $validatedData = request()->validate([
+            'planName' => 'required|string|max:255',
+            'price' => 'required|numeric',
+            'currency' => 'required|integer|exists:currencies,currencyId',
+            'features' => 'required|string',
+            'isPopular' => 'required|boolean',
+            'tenantLimit' => 'required|integer',
+            'invoiceLimit' => 'required|integer',
+        ]);
+    
+        $plan = Plans::create($validatedData);
+    
+        return response()->json(['message' => 'Plan created successfully', 'plan' => $plan], 201);
+    });
+
+    Route::post('/currencies', function () {
+        $validatedData = request()->validate([
+            'currencyName' => 'required|string|max:255',
+            'currencyCode' => 'required|string|max:10',
+            'currencySymbol' => 'required|string|max:10',
+            'country' => 'required|string|max:255',
+        ]);
+    
+        $currency = Currency::create($validatedData);
+    
+        return response()->json(['message' => 'Currency created successfully', 'currency' => $currency], 201);
+    });
+
+    Route::patch('/currencies/{currencyId}', function ($currencyId) {
+        
+        $validatedData = request()->validate([
+            'currencyName' => 'sometimes|string|max:255',
+            'currencyCode' => 'sometimes|string|max:10',
+            'currencySymbol' => 'sometimes|string|max:10',
+            'country' => 'sometimes|string|max:255',
+        ]);
+        Currency::where('currencyId', $currencyId)->update($validatedData);
+        return response()->json(['message' => 'Currency updated successfully']);
+    });
+
+    Route::post('/payment-gateways', function () {
+        $validatedData = request()->validate([
+            'paymentGatewayName' => 'required|string|max:255',
+            'url' => 'nullable|string',
+        ]);
+    
+        $gateway = PaymentGateway::create($validatedData);
+    
+        return response()->json(['message' => 'Payment gateway created successfully', 'gateway' => $gateway], 201);
+    }); 
+
+    Route::patch('/payment-gateways/{gatewayId}', function ($gatewayId) {
+        
+        $validatedData = request()->validate([
+            'paymentGatewayName' => 'sometimes|string|max:255',
+            'url' => 'sometimes|string',
+        ]);
+        PaymentGateway::where('gatewayId', $gatewayId)->update($validatedData);
+        return response()->json(['message' => 'Payment gateway updated successfully']);
+    });
+  
     Route::get('profile', [UsersController::class, 'userProfile']);
     Route::patch('/profile', [UsersController::class, 'updateUser']);
     Route::patch('/profile/password', [UsersController::class, 'updatePassword']);
