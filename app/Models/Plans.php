@@ -10,7 +10,7 @@ class Plans extends Model
     use HasFactory;
     public $table = 'plans';
     protected $primaryKey = 'planId';
-    protected $fillable = ['planName', 'price', 'currency', 'features', 'isPopular', 'tenantLimit', 'invoiceLimit'];
+    protected $fillable = ['planName', 'price', 'currency', 'features', 'isPopular', 'tenantLimit', 'invoiceLimit', 'flutterwavePlanId'];
 
     public function currency_detail()
     {

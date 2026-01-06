@@ -51,6 +51,7 @@ use Tymon\JWTAuth\Claims\Custom;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\SupportController;
+use App\Http\Controllers\PlansController;
 
 /*
 |--------------------------------------------------------------------------
@@ -146,36 +147,10 @@ Route::get('/plans', function () {
     return response()->json($plans);
     });
 
-    Route::patch('/subscription-plans/{planId}', function ($planId) {
-        
-        $validatedData = request()->validate([
-            'planName' => 'sometimes|string|max:255',
-            'price' => 'sometimes|numeric',
-            'currency' => 'sometimes|integer|exists:currencies,currencyId',
-            'features' => 'sometimes|string',
-            'isPopular' => 'sometimes|boolean',
-            'tenantLimit' => 'sometimes|integer',
-            'invoiceLimit' => 'sometimes|integer',
-        ]);
-        Plans::where('planId', $planId)->update($validatedData);
-        return response()->json(['message' => 'Plan updated successfully']);
-    });
 
-    Route::post('/subscription-plans', function () {
-        $validatedData = request()->validate([
-            'planName' => 'required|string|max:255',
-            'price' => 'required|numeric',
-            'currency' => 'required|integer|exists:currencies,currencyId',
-            'features' => 'required|string',
-            'isPopular' => 'required|boolean',
-            'tenantLimit' => 'required|integer',
-            'invoiceLimit' => 'required|integer',
-        ]);
-    
-        $plan = Plans::create($validatedData);
-    
-        return response()->json(['message' => 'Plan created successfully', 'plan' => $plan], 201);
-    });
+
+    Route::post('/subscription-plans', [PlansController::class, 'store']);
+    Route::patch('/subscription-plans/{planId}', [PlansController::class, 'update']);
 
     Route::post('/currencies', function () {
         $validatedData = request()->validate([
