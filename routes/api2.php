@@ -52,7 +52,6 @@ use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\SupportController;
 use App\Http\Controllers\PlansController;
-use App\Http\Controllers\AdminDashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -147,6 +146,8 @@ Route::get('/plans', function () {
 
     return response()->json($plans);
     });
+
+
 
     Route::post('/subscription-plans', [PlansController::class, 'store']);
     Route::patch('/subscription-plans/{planId}', [PlansController::class, 'update']);
@@ -314,13 +315,4 @@ Route::prefix('receipts')->group(function () {
 
 Route::post('/flutterwave/webhook', [WebhookController::class, 'handle']);
 Route::get('/subscription/verify-redirect', [SubscriptionController::class, 'verifyRedirect']);
-
-Route::middleware(['auth.jwt'])->group(function () {
-    Route::get('/admin/dashboard-counts', [AdminDashboardController::class, 'dashboardCounts']);
-    Route::get('/admin/dashboard-details/users', [AdminDashboardController::class, 'usersDetails']);
-    Route::get('/admin/dashboard-details/invoices', [AdminDashboardController::class, 'invoicesDetails']);
-    Route::get('/admin/dashboard-details/receipts', [AdminDashboardController::class, 'receiptsDetails']);
-    Route::get('/admin/dashboard-details/businesses', [AdminDashboardController::class, 'businessesDetails']);
-
-});
 
